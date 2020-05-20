@@ -1,0 +1,48 @@
+<html>
+<head>
+  <title>Word Salad Sandwich!</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <script src="https://code.jquery.com/jquery-3.0.0.min.js" charset="utf-8"></script>
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@0.3.20/dist/peer.min.js"></script>
+  <script defer="" src="/wss.77a0a3b8.js" charset="utf-8"></script>
+
+  Host?<br> <gamecode></gamecode>
+  <hostgame>
+    <button onclick="host()" type="button" name="button">Host</button>
+    <prompt></prompt>
+    <answerList>
+    </answerList>
+  </hostgame>
+
+  Player?<br>
+  <join>
+    <input id="roomcode" type="text">
+    <input id="name" type="text">
+    <button onclick="client()" type="button" name="button">Join!</button>
+
+  </join>
+
+  <playergame style="display:none;">
+    <submission>
+      <prompt></prompt>
+      <input class="answer" type="text">
+      <button id="sendAnswer" type="button" name="button">Join!</button>
+      <script>var answer = $(".answer")[0].value;
+$("#sendAnswer").click(function () {
+  conn.send("".concat(playerID, ", ").concat(answer));
+});</script>
+    </submission>
+    <answerList>
+      <button user="">${answer}</button>
+      <button user="">${answer}</button>
+    </answerList>
+  </playergame>
+
+
+
+
+
+</head></html>
