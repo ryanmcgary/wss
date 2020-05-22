@@ -19298,7 +19298,36 @@ window._ = _; // if (window.location.hostname === "localhost"){
 // 	var socket = io.connect(window.location.origin);
 // }
 
-window.DATA_FEEDS = {};
+window.DATA_FEEDS = [];
+var url = new URL(window.location.href);
+
+if (url.pathname === "/host") {
+  // HOST
+  var code = makeid(4);
+  var peerID = "wordsaladsandwich-".concat(code);
+  var innerHTML = "Room code is ".concat(code);
+  window.peer = new Peer(peerID);
+  if (peer.id === peerID) $("gamecode").text(code);
+  peer.on("open", function (id) {
+    console.log("established", id);
+  });
+  peer.on('error', function (err) {
+    console.log("Error: ", err);
+  });
+  peer.on('connection', function (conn) {
+    conn.on('open', function () {
+      // here you have conn.id
+      var conn2 = peer.connect(conn.peer);
+      DATA_FEEDS.push(conn2);
+      console.log("host open", conn, conn.peer, conn2);
+      window.conn2 = conn2;
+    });
+    conn.on('data', function (data) {
+      console.log("sds", data); // conn.send(`name,zzz`)
+    });
+  });
+} else {//client
+}
 
 function shuffle(array) {
   var i = array.length,
@@ -19337,60 +19366,38 @@ window.shuffle = shuffle;
 window.offset = offset;
 window.makeid = makeid;
 
-function host() {
-  var code = makeid(4);
-  var peerID = "wordsaladsandwich-".concat(code);
-  var innerHTML = "Room code is ".concat(code);
-  var peer = new Peer(peerID, {
-    key: 'lwjd5qra8257b9'
-  });
-  window.peer = peer;
-  if (peer.id === peerID) $("gamecode").text(code);
-  peer.on('connection', function (conn) {
-    conn.on('open', function () {
-      // here you have conn.id
-      console.log(conn);
-      var conn2 = peer.connect(conn.peer);
-      DATA_FEEDS[conn.peer] = conn2;
-      conn2.send("your fucking connected");
-    });
-    conn.on('data', function (data) {
-      console.log("sds", data); // conn.send(`name,zzz`)
-    });
-  });
-}
-
-window.host = host;
-
-function client() {
+function client(peer) {
   var host = $("#roomcode")[0].value;
   var name = $("#name")[0].value;
   var hostID = "wordsaladsandwich-".concat(host);
-  console.log(host, name, hostID);
+  window.peer = new Peer();
+  peer = window.peer;
+  peer.on("open", function (id) {
+    var host = peer.connect(hostID);
+    DATA_FEEDS.push(host);
+  });
+  peer.on('connection', function (conn) {
+    conn.on('open', function () {
+      console.log("client open", conn); // need to hide "join game button once this is recieved"
 
-  if (!window.peer || window.peer && !(peer === null || peer === void 0 ? void 0 : peer.disconnected)) {
-    var peer = new Peer({
-      key: 'lwjd5qra8257b9'
+      emit("name,".concat(name));
+      DATA_FEEDS.push(conn);
     });
-    window.peer = peer;
-    peer.on('connection', function (conn) {
-      conn.on('open', function () {// here you have conn.id
-        // var conn2 = peer.connect(conn.peer);
-        // DATA_FEEDS[conn.peer] = conn2;
-      });
-      conn.on('data', function (data) {
-        console.log("sds", data);
-        window.datum = data;
-      });
+    conn.on('data', function (data) {
+      console.log("sds", data);
+      window.datum = data;
     });
-  }
-
-  var host = peer.connect(hostID);
-  window.hostp = host;
-  DATA_FEEDS[hostID] = host; // host.send("namemmmmm")
+  });
+  peer.on('error', function (err) {
+    console.log("Error: ", err);
+  });
+  console.log("hostID", host, peer);
 }
 
 window.client = client;
+$(".zz").click(function () {
+  client(window.peer);
+});
 window.GAME_STAGE;
 
 function hostStages(data) {
@@ -19549,13 +19556,13 @@ function peerRules(peer) {
 }
 
 function emit(payload) {
-  for (var _i2 = 0, _Object$entries = Object.entries(DATA_FEEDS); _i2 < _Object$entries.length; _i2++) {
-    var _Object$entries$_i = _slicedToArray(_Object$entries[_i2], 2),
-        key = _Object$entries$_i[0],
-        conn = _Object$entries$_i[1];
+  // for (let [key, conn] of Object.entries(DATA_FEEDS)) {
+  DATA_FEEDS.forEach(function (conn, i) {
+    var _conn$peerConnection;
 
-    conn.send(payload);
-  }
+    if ((conn === null || conn === void 0 ? void 0 : (_conn$peerConnection = conn.peerConnection) === null || _conn$peerConnection === void 0 ? void 0 : _conn$peerConnection.localDescription.type) === "offer") // offer or answer
+      conn.send(payload);
+  }); // }
 }
 
 window.emit = emit; // function peerInterval() {
@@ -19616,7 +19623,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51060" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51699" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
