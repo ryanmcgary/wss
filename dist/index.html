@@ -9,41 +9,62 @@
   <!-- <script src="https://cdn.jsdelivr.net/npm/peerjs@0.3.20/dist/peer.min.js"></script> -->
   <script src="https://cdn.jsdelivr.net/npm/peerjs@1.2.0/dist/peerjs.min.js"></script>
   <script defer="" src="/wss.77a0a3b8.js" charset="utf-8"></script>
+</head>
+<body>
 
-  Host?<br> <gamecode></gamecode>
+  <gamecode></gamecode>
   <hostgame>
-    <button onclick="host()" type="button" name="button">Host</button>
     <prompt></prompt>
     <answerList>
     </answerList>
   </hostgame>
 
-  Player?<br>
   <join>
-    <input id="roomcode" type="text">
-    <input id="name" type="text">
+    room code:<br><input id="roomcode" type="text"><br>
+    name:<br><input id="name" type="text"><br>
     <button onclick="client()" type="button" name="button">Join!</button>
-
   </join>
 
-  <playergame style="display:none;">
-    <submission>
+  <playergame>
+    <stage></stage>
+    <phase class="one hide">
+      <button type="button" onclick="emit('start')" name="button">Start Game</button>
+    </phase>
+
+    <phase class="submitAnswers hide">
+      <question class="one">
+        <prompt></prompt>
+        <input type="text" placeholder="enter your answer">
+        <button type="button" onclick="emit('prompt')" name="button">submit</button>
+      </question>
+      <question class="two">
+        <prompt></prompt>
+        <input type="text" placeholder="enter your answer">
+        <button type="button" onclick="emit('prompt')" name="button">submit</button>
+      </question>
+    </phase>
+
+    <phase class="vote hide">
       <prompt></prompt>
-      <input class="answer" type="text">
-      <button id="sendAnswer" type="button" name="button">Join!</button>
-      <script>var answer = $(".answer")[0].value;
-$("#sendAnswer").click(function () {
-  conn.send("".concat(playerID, ", ").concat(answer));
-});</script>
-    </submission>
-    <answerList>
-      <button user="">${answer}</button>
-      <button user="">${answer}</button>
-    </answerList>
+      <button onclick="emit('vote')">1</button>
+      <button onclick="emit('vote');">2</button>
+    </phase>
+
   </playergame>
 
+<style media="screen">.hide{display: none;}</style>
+<script>var url = new URL(window.location.href);
 
+if (url.pathname !== "/host") {
+  var innerHTML = "or <a href=\"/host\">Host a game!</a>";
+  $("join").append(innerHTML);
+} else {
+  $("join").addClass("hide");
 
+  window.onbeforeunload = function () {
+    return "Are you sure?";
+  };
+}</script>
 
-
-</head></html>
+</body>
+</html>
