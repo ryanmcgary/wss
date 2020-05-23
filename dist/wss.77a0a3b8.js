@@ -19307,9 +19307,9 @@ if (url.pathname === "/host") {
   var peerID = "wordsaladsandwich-".concat(code);
   var innerHTML = "Room code is ".concat(code);
   window.peer = new Peer(peerID);
-  if (peer.id === peerID) $("gamecode").text(code);
   peer.on("open", function (id) {
     console.log("established", id);
+    if (id === peerID) $("gamecode").text(code);
   });
   peer.on('error', function (err) {
     console.log("Error: ", err);
@@ -19319,8 +19319,8 @@ if (url.pathname === "/host") {
       // here you have conn.id
       var conn2 = peer.connect(conn.peer);
       DATA_FEEDS.push(conn2);
+      emit("WELCOME");
       console.log("host open", conn, conn.peer, conn2);
-      window.conn2 = conn2;
     });
     conn.on('data', function (data) {
       console.log("sds", data); // conn.send(`name,zzz`)
@@ -19367,16 +19367,21 @@ window.offset = offset;
 window.makeid = makeid;
 
 function client(peer) {
+  var _window$peer;
+
   var host = $("#roomcode")[0].value;
   var name = $("#name")[0].value;
   var hostID = "wordsaladsandwich-".concat(host);
-  window.peer = new Peer();
-  peer = window.peer;
-  peer.on("open", function (id) {
-    var host = peer.connect(hostID);
+  close();
+  (_window$peer = window.peer) === null || _window$peer === void 0 ? void 0 : _window$peer.destroy();
+  window.peer = new Peer(); // have to initialize this every time because library won't let you delete hanged connectoin attempts
+  // peer = window.peer
+
+  window.peer.on("open", function (id) {
+    var host = window.peer.connect(hostID);
     DATA_FEEDS.push(host);
   });
-  peer.on('connection', function (conn) {
+  window.peer.on('connection', function (conn) {
     conn.on('open', function () {
       console.log("client open", conn); // need to hide "join game button once this is recieved"
 
@@ -19388,16 +19393,13 @@ function client(peer) {
       window.datum = data;
     });
   });
-  peer.on('error', function (err) {
+  window.peer.on('error', function (err) {
     console.log("Error: ", err);
   });
   console.log("hostID", host, peer);
 }
 
 window.client = client;
-$(".zz").click(function () {
-  client(window.peer);
-});
 window.GAME_STAGE;
 
 function hostStages(data) {
@@ -19555,12 +19557,23 @@ function peerRules(peer) {
   // }
 }
 
-function emit(payload) {
+function close() {
   // for (let [key, conn] of Object.entries(DATA_FEEDS)) {
   DATA_FEEDS.forEach(function (conn, i) {
     var _conn$peerConnection;
 
-    if ((conn === null || conn === void 0 ? void 0 : (_conn$peerConnection = conn.peerConnection) === null || _conn$peerConnection === void 0 ? void 0 : _conn$peerConnection.localDescription.type) === "offer") // offer or answer
+    conn === null || conn === void 0 ? void 0 : (_conn$peerConnection = conn.peerConnection) === null || _conn$peerConnection === void 0 ? void 0 : _conn$peerConnection.close();
+  }); // }
+}
+
+window.close();
+
+function emit(payload) {
+  // for (let [key, conn] of Object.entries(DATA_FEEDS)) {
+  DATA_FEEDS.forEach(function (conn, i) {
+    var _conn$peerConnection2, _conn$peerConnection3;
+
+    if ((conn === null || conn === void 0 ? void 0 : (_conn$peerConnection2 = conn.peerConnection) === null || _conn$peerConnection2 === void 0 ? void 0 : (_conn$peerConnection3 = _conn$peerConnection2.localDescription) === null || _conn$peerConnection3 === void 0 ? void 0 : _conn$peerConnection3.type) === "offer") // offer or answer
       conn.send(payload);
   }); // }
 }

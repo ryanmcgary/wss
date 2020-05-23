@@ -19,12 +19,13 @@ if (url.pathname === "/host"){ // HOST
   var code = makeid(4)
   var peerID = `wordsaladsandwich-${code}`
   var innerHTML = `Room code is ${code}`
+
   window.peer = new Peer(peerID);
-  if (peer.id === peerID)
-    $("gamecode").text(code)
 
   peer.on("open", function(id) {
     console.log("established" ,id)
+    if (id === peerID)
+      $("gamecode").text(code)
   });
   peer.on('error', function(err) {
       console.log("Error: ", err);
@@ -35,9 +36,9 @@ if (url.pathname === "/host"){ // HOST
 
       var conn2 = peer.connect(conn.peer);
       DATA_FEEDS.push(conn2);
-
+      emit("WELCOME")
       console.log("host open", conn, conn.peer,conn2);
-      window.conn2 = conn2;
+
     });
     conn.on('data', function(data){
       console.log("sds",data);
@@ -92,15 +93,16 @@ function client(peer){
   var host = $("#roomcode")[0].value
   var name = $("#name")[0].value
   var hostID = `wordsaladsandwich-${host}`
+  close()
+  window.peer?.destroy();
 
-
-  window.peer = new Peer();
-  peer = window.peer
-  peer.on("open", function(id) {
-    var host = peer.connect(hostID);
+  window.peer = new Peer(); // have to initialize this every time because library won't let you delete hanged connectoin attempts
+  // peer = window.peer
+  window.peer.on("open", function(id) {
+    var host = window.peer.connect(hostID);
     DATA_FEEDS.push(host);
   });
-  peer.on('connection', function(conn) {
+  window.peer.on('connection', function(conn) {
     conn.on('open', function(){
       console.log("client open",conn); // need to hide "join game button once this is recieved"
       emit(`name,${name}`)
@@ -112,20 +114,13 @@ function client(peer){
 
     });
   })
-  peer.on('error', function(err) {
+  window.peer.on('error', function(err) {
       console.log("Error: ", err);
   });
-
-
-
   console.log("hostID", host, peer);
-
 }
 window.client = client;
 
-$(".zz").click(function() {
-  client(window.peer);
-})
 
 window.GAME_STAGE;
 function hostStages(data){
@@ -266,10 +261,18 @@ function peerRules(peer){
 }
 
 
+function close() {
+  // for (let [key, conn] of Object.entries(DATA_FEEDS)) {
+  DATA_FEEDS.forEach((conn, i) => {
+    conn?.peerConnection?.close();
+  });
+  // }
+}
+window.close()
 function emit(payload) {
   // for (let [key, conn] of Object.entries(DATA_FEEDS)) {
   DATA_FEEDS.forEach((conn, i) => {
-    if (conn?.peerConnection?.localDescription.type  === "offer") // offer or answer
+    if (conn?.peerConnection?.localDescription?.type  === "offer") // offer or answer
       conn.send(payload)
   });
   // }
