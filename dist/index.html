@@ -4,53 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-
+  <style>gameview prompt{
+      display: none;
+    }
+    gameview prompt:first-child{
+      display: block;
+    }</style>
   <script src="https://code.jquery.com/jquery-3.0.0.min.js" charset="utf-8"></script>
   <!-- <script src="https://cdn.jsdelivr.net/npm/peerjs@0.3.20/dist/peer.min.js"></script> -->
   <script src="https://cdn.jsdelivr.net/npm/peerjs@1.2.0/dist/peerjs.min.js"></script>
   <script defer="" src="/wss.77a0a3b8.js" charset="utf-8"></script>
 </head>
 <body>
-
+  <timer></timer>
   <gamecode></gamecode>
-  <hostgame>
-    <prompt></prompt>
-    <answerList>
-    </answerList>
-  </hostgame>
+  <gameview>
+    <join>
+      room code:<br><input id="roomcode" type="text"><br>
+      name:<br><input id="name" type="text"><br>
+      <button onclick="client()" type="button" name="button">Join!</button>
+    </join>
+  </gameview>
 
-  <join>
-    room code:<br><input id="roomcode" type="text"><br>
-    name:<br><input id="name" type="text"><br>
-    <button onclick="client()" type="button" name="button">Join!</button>
-  </join>
-
-  <playergame>
-    <stage></stage>
-    <phase class="one hide">
-      <button type="button" onclick="emit('start')" name="button">Start Game</button>
-    </phase>
-
-    <phase class="submitAnswers hide">
-      <question class="one">
-        <prompt></prompt>
-        <input type="text" placeholder="enter your answer">
-        <button type="button" onclick="emit('prompt')" name="button">submit</button>
-      </question>
-      <question class="two">
-        <prompt></prompt>
-        <input type="text" placeholder="enter your answer">
-        <button type="button" onclick="emit('prompt')" name="button">submit</button>
-      </question>
-    </phase>
-
-    <phase class="vote hide">
-      <prompt></prompt>
-      <button onclick="emit('vote')">1</button>
-      <button onclick="emit('vote');">2</button>
-    </phase>
-
-  </playergame>
 
 <style media="screen">.hide{display: none;}</style>
 <script>var url = new URL(window.location.href);

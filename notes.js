@@ -1,4 +1,321 @@
 
+recive: start
+lockInit, generate & send playerList & prompts
+round1prompts, send state, start timer, while state receive answers
+  when timer out or answers === player.length * 2
+end
+round1vote,
+  if round1 answers.unshift, emit question 1, start timer
+    if (phaseVote && round1 && prompt_ID) store answer
+    if votes.length === player.length stop timer
+    play results set gap timer
+  if round1 answers.unshift, emit question N, start timer
+    if (phaseVote && round1 && prompt_ID) store answer
+    if votes.length === player.length stop timer
+    play results set gap timer
+  if round1 answers.unshift === false
+round1prompts, send state, start timer, while state receive answers
+  when timer out or answers === player.length * 2
+end
+
+tomorrow,
+  game timers on host only
+  game triggers each stage and also to wipe stages on mobile clients
+function tickGameState(){
+  round = 0
+  host recieves start
+  host send playerList & prompts
+    host send start prompt answer timer
+      on each recieve of answer check that all answers recieved
+      if yes, clear timer and execute next step
+      else timer ends, execute next step
+    host sends answers, start vote unshift question 1
+      on each recieve of vote check that all votes recieved
+      if yes, clear timer and execute next step
+      else timer ends, execute next step
+    play results
+    start vote next question N
+  if question list length 0
+  host send end round
+  round = 1
+  host send start prompt answer timer (start cycle again)
+  if question list length 0
+  round = 2 // final
+  host send start prompt answer timer (start cycle again)
+
+}
+
+function badwrap() {
+  var players;
+  // client
+  var name="mike"
+  metadata = name
+  var round = 0;
+  // host
+  var clientArray = _.reduce(peer.connections, (arr, conns)=>{
+    var meta = _.reduce(conns, (arr, conn)=>{
+         if (conn.open) arr.push(conn.metadata);
+        return arr;
+    }, []);
+    arr.push(meta)
+    return arr;
+  }, [])
+  var clientArrayFlat = a.flat().filter(Boolean)
+  players = [...new Set(amyFlatArray)]
+  emit("lobby", players)
+  //client
+  emit("start")
+  //host
+  var n = players.length
+  var ranNums = shuffle(prompts);
+  var game_prompts = [ranNums.splice(0, n), ranNums.splice(0, n), ranNums.splice(0, 1)]
+  var prompts = ["a","b","c"]["d","e","f"]["g"]
+  emit("playerList", players)
+  emit("promptList", prompts)
+  emit("startQuestions")
+  // client
+  on: players = unescape(players)
+    player_id = players.indexOf(`${name}`)
+  on: prompts = unescape(prompts)
+
+  j = ranNums.splice(0,(n * 2 + 1))
+  z = j.map((p,i) => { return {id: i, p: p} })
+  var gp = [z.splice(0, n), z.splice(0, n), z.splice(0, 1)]
+
+  p.forEach(function (e,i){
+    gp[0][i]["round"] = 0;
+    (gp[0][i]["pl"] = gp[0][i]["pl"] || []).push(i);
+    (gp[0][i]["pl"] = gp[0][i]["pl"] || []).push(offset(i+2));
+
+    gp[1][i]["round"] = 1;
+    (gp[1][i]["pl"] = gp[1][i]["pl"] || []).push(i);
+    (gp[1][i]["pl"] = gp[1][i]["pl"] || []).push(offset(i+1));
+
+    gp[2][0]["round"] = 2;
+    (gp[2][0]["pl"] = gp[2][0]["pl"] || []).push(i);
+  })
+  a = gp.flat(); // a =[{id: 0, p: "George W. Bush and Dick Cheney's rap duo name", round: 0, pl: Array(2)}]
+  z =_.reduce(a, (arr, prompt) => {
+      if (prompt.pl.includes(player_id) && prompt.round === round){
+        arr.append(`<prompt>${prompt.p}</prompt>
+        <input></input>
+        <button onclick="emit('answer,${player_id},${prompt.round},${prompt.id},'+this.previousElementSibling.textContent)"></button>
+        `)
+      }
+      return arr;
+  },[])
+  // host
+    answers =
+    [
+      {round: 1, promptId: 1, userId: 0, points:0, text: "answer"},
+      {round: 1, promptId: 1, userId: 1, points:0, text: "answer"}
+    ]
+    start timer
+    emit("vote,"+answers.toString())
+  // client
+      start timer
+      prompt_answer = answers.filter((b)=>{ return (b.promptId === prompt)} )
+      if (!prompt_answer.some((a)=> a.userId === player_id))
+        var prompt_ui=prompt_answer.map(pa => `<button onclick="emit('vote,${player_id},${pa.round},${pa.id})">${pa.text}</button>`)
+      var innerHTML = `
+        <prompt>${prompts[id]}</prompt>
+        ${prompt_ui}
+      `
+      $(".vote").append(innerHTML)
+}
+
+
+
+
+
+
+
+// P jim, sam, mike
+// PR [1,2,3][1,2,3][1]
+// R 0
+//   P1, PR[0][1]: ANSWER
+//   P2, PR[0][1]: ANSWER
+//
+//
+// collect PLAYERS
+// distribute players
+// distribute PROMPTS
+// c_display PROMPTS
+// collect ANSWERS
+// c_distribute ANSWERS
+// c_display ANSWERS
+// collect VOTES
+// broadcast VOTES
+
+
+window.round = 0;
+window.PLAYERS = [];
+window.GAME_STAGE = undefined;
+function hostStages(data){
+  var [stage, user, round, question, promptId, answers] = data.split(",")
+  if (!GAME_STAGE && stage === "name"){
+    PLAYERS.push(user)
+  }
+  if (!GAME_STAGE && stage === "start"){
+    GAME_STAGE = "prompt";
+    emit(`playerList,${escape(PLAYERS)}`)
+    // emit(`questionList,${escape(QUESTIONS)}`)
+    emit(`prompt,${window.round}`)
+  }
+
+  if (GAME_STAGE === "prompt" && stage === "prompt"){
+    // setTimer
+    GAME_STAGE = "vote";
+    emit(`vote,${window.round}`)
+    // ANSWERS.push(content)
+    // if (answers.length){
+    //   stopTimer && emit("vote", escape(answers))
+    // }
+    // GAME_STAGE = "vote"
+  }else
+  if (GAME_STAGE === "vote" && stage === "vote"){
+    GAME_STAGE = "prompt";
+    window.round++
+    if (window.round < 3){
+      emit(`prompt,${window.round}`)
+    }else{
+      GAME_STAGE = undefined
+      window.round = 0
+      emit(`welcome`)
+    }
+  }
+
+}
+
+// playerList
+// emit(`playerList,${escape(["joe","john","bob","sam","yun"])}`)
+// promptList
+  // var PLAYERS = ["joe","john","bob","sam","yun"]
+  // var n = PLAYERS.length
+  // var ranNums = shuffle(prompts);
+  //var game_prompts = [ranNums.splice(0, n), ranNums.splice(0, n), ranNums.splice(0, 1)]
+  //emit(`promptList,${escape(game_prompts)}`)
+
+function clientStages(data){
+  var [stage, content, round, promptId, answers] = data.split(",")
+  if (stage === "welcome"){
+    console.log("playerList");
+    $("playergame phase, join").addClass("hide")
+    $("playergame phase.one").removeClass("hide")
+    // window.playerList = unescape(content).split(",")
+  }
+  if (stage === "playerList"){
+      console.log("playerList",stage, content);
+    // window.playerList = unescape(content).split(",")
+  }
+  if (stage === "promptList"){
+        console.log("promptList");
+    // var n = playerList.length;
+
+    // window.questions = unescape(content).split(",");
+    // window.game_prompts = [questions.splice(0, n), questions.splice(0, n), questions.splice(0, 1)]
+  }
+  if (stage === "prompt"){
+    console.log("prompt", stage, content, round);
+    $("playergame phase").addClass("hide")
+    $("playergame phase.submitAnswers").removeClass("hide")
+    // setTimer
+    // questions.map(answer => `<input></input><button onclick="sendResponse()"><button>`)
+  }
+  if (stage === "vote"){
+      console.log("vote", stage, content, round);
+      $("playergame phase").addClass("hide")
+      $("playergame phase.vote").removeClass("hide")
+    // setTimer
+    // var response = unescape(content).split(",");
+    // response.map(answer => `<div onclick="vote(id);showNext()">${answers.text}</div>`)
+  }
+  if (stage === "finalVote"){
+      console.log("finalVote");
+    // setTimer
+    // var response = unescape(content).split(",");
+    // response.map(answer => `<div onclick="vote(id)">${answers.text}</div>`)
+  }
+}
+window.clientStages = clientStages;
+
+
+// function emit(values){
+//   conn.send(values)
+// }
+function peerRules(peer){
+
+
+  // if HOST
+  // if(window.host_peer){
+    peer.on('connection', function(conn) {
+      conn.on('open', function(){
+        // here you have conn.id
+        // DATA_FEEDS[peerId] = conn;
+        // conn.send(`name,${name}`)
+      });
+    	conn.on('data', function(data){
+        // console.log("sds",data);
+        // conn.send(`name,${name}`)
+        // var [action, name, round, prompt, response] = data.split(",")
+        // if (action == "name")
+        //   PLAYERS.push(name)
+        //   emit("players", PLAYERS)
+        //
+        // if (action == "start")
+        //   var n = PLAYERS.length
+        //   var ranNums = shuffle(QUESTIONS);
+        //   var game_prompts = [ranNums.splice(0, n), ranNums.splice(0, n), ranNums.splice(0, 1)]
+        //   emit("players", PLAYERS)
+        //   emit("prompts", game_prompts)
+        //   emit("start", game_prompts)
+        //
+        // if (action == "submitAnswer")
+        //   round[round][game_prompts][prompt]["votes"].push(prompt)
+        //   emit("answer", game_prompts)
+        // if (action == "vote")
+        //   round[round][game_prompts][prompt]["votes"].push(prompt)
+        //   // render vote talley
+        //   emit("next")
+
+      });
+    })
+  // }else{
+  //   // if CLIENT
+  //   peer.on('connection', function(conn) {
+  //     conn.on('open', function(){
+  //       // here you have conn.id
+  //       // DATA_FEEDS[peerId] = conn;
+  //       conn.send(`name,${name}`)
+  //     });
+  //   	conn.on('data', function(data){
+  //
+  //       console.log("sds",data);
+  //       // var [action, data] = data.split(",")
+  //       // if (action == "players"){
+  //       //   PLAYERS.push(data)
+  //       //   render("lobby")
+  //       // }
+  //       // if (action == "prompts"){
+  //       //   var PROMPTS = data.split(",")
+  //       // }
+  //       // if (action == "start"){
+  //       //   render("prompts") // has submitAnswer onclick
+  //       // }
+  //       //
+  //       // if (action == "vote"){
+  //       //   render("vote") // has submitAnswer onclick
+  //       //   // render vote talley
+  //       //   emit("next")
+  //       // }
+  //     });
+  //   })
+  // }
+}
+
+
+
+
 <script type="text/javascript">
 
 
