@@ -140,7 +140,7 @@ function initHost(){
   window.n;
   window.phase = "lobby"
   window.round = 0
-  window.prompt;
+  window.prompt = 0;
   window.players=[];
   window.stage={};
   window.answers = {all:[], 0:[],1:[],2:[]}
@@ -169,11 +169,11 @@ stage.answer = function(phase, player_id, round_id, prompt_id, content) {
 
 stage.processAnswers = function(phase, player_id, round_id, prompt_id, content) {
   console.log("processAnswers");
-  if (window.round == round_id){ //0 is text, boo
+  // if (window.round == round_id){ //0 is text, boo
     console.log("processAnswers tru");
     answers.all.push({player_id: player_id, round_id: round_id, prompt_id: prompt_id, answer: content})
     answers[round_id].push({player_id: player_id, round_id: round_id, prompt_id: prompt_id, answer: content})
-  }
+  // }
 }
 
 stage.lobby = function() {
@@ -237,28 +237,43 @@ stage.lockInit = function() {
     stage.roundprompts();
 }
 
-stage.roundprompts = function() {
-  if (window.phase === "lobby"){
+stage.roundprompts = function(triggerRender) {
+  console.log("roundprompts", triggerRender, window.round), window.phase;
+  if (window.phase === "lobby" || window.phase === "voting"){
     window.phase = "prompts";
-    // emit("prompts")
-    var timer = 20000
+    if (triggerRender) emit(`prompts`);
+    console.log("triggerRender", triggerRender);
+    var timer = 75000
     var temp_answers = []
     var gameInterval = setInterval(function () {
       if (timer > 0){
         timer -= 1000
         $("timer").html(timer / 1000);
+        if (window.answers[window.round].length === players.length * 2) timer = 0;
+        if (window.answers[window.round].length === players.length && window.round == 2) timer = 0;
+        console.log("fuckery", timer,window.answers[window.round].length === players.length * 2);
       }else{
         emit(`answers,${escape(JSON.stringify(answers[window.round]))}`)
         $("timer").html("");
         emit("blank");
         window.clearInterval(gameInterval);
-        // stage.roundvote();
+        setTimeout(function () {
+          stage.roundvote();
+        }, 5000);
       }
     }, 1000);
   }
 
 }
 
+//
+// sds vote,2,1,0,1
+// index.es6:152 Uncaught TypeError: stage[phase] is not a function
+//     at hostIntake (index.es6:152)
+//     at s.<anonymous> (index.es6:53)
+//     at s.i.emit (peerjs.min.js:46)
+//     at s._handleDataMessage (peerjs.min.js:62)
+//     at RTCDataChannel.dataC
   // answers =
   // [
   //   {round: 1, prompt_id: 1, user_id: 0, points:0, answer: "answer"},
@@ -269,25 +284,19 @@ stage.roundprompts = function() {
   // client
     // start timer
 
-    if (!answers.some((a)=> a.player_id == window.n && a.prompt_id == prompt_id)){
-      var prompt_text = gp[round][prompt_id].p
-      prompt_answer = answers.filter((b)=>{ return (b.prompt_id == prompt_id)} )
-      var prompt_ui = prompt_answer.map(pa => `<button onclick="emit('vote,${n},${pa.player_id},${pa.round_id},${pa.prompt_id}')">${pa.answer}</button>`)
-    }
-    var innerHTML = `
-      <prompt>
-        ${prompt_text}
-        ${prompt_ui}
-      </prompt>
-    `
-    $("gameview").html(innerHTML)
+
 
 stage.roundvote = function() {
-  var voteable = answers[round].unshift
-  if (voteable){
+  console.log("roundprompts", window.round, window.prompt, players.length);
+  // if (window.prompt !== players.length){// + one is a zero index thing
+  if (window.prompt % players.length || !(window.prompt % players.length) && window.phase !== "voting" ){
     window.phase = "voting";
-    var timer = 15000
-    emit("vote");
+    var timer = 10000
+    emit(`vote,,${window.round},${window.prompt}`);
+    if (window.prompt > players.length + players.length) {$("gamecode").html("DONE BRO"); return true;}
+    window.prompt += 1;
+    console.log("vote cycle", `round: ${window.round},prompt: ${window.prompt}`);
+
     var gameInterval = setInterval(function () {
       if (timer > 0){
         timer -= 1000
@@ -295,12 +304,19 @@ stage.roundvote = function() {
       }else{
         $("timer").html("");
         emit("blank")
-        calculate()
+        window.clearInterval(gameInterval);
+        stage.roundvote()
       }
     }, 1000);
   }else { // once no more answers to vote on
-    window.round += 1;
-    stage.roundprompts();
+    if (window.round == 2){
+      $("gamecode").html("DONE BRO")
+    }else{
+      window.round += 1;
+      emit(`round,,${window.round}`);
+      console.log("end of voting", "round:", round, "prompt:", prompt);
+      stage.roundprompts(true);
+    }
   }
 }
 
@@ -308,8 +324,9 @@ stage.roundvote = function() {
 
 function clientIntake(data){
   window.datum = data;
-  var [stage, content, round, promptId, answers] = data.split(",")
-  window.dater = {stage: stage, content: content, round: round, promptId: promptId, answers: answers};
+  var [stage, content, round, prompt_id, answers] = data.split(",")
+  if (round) window.round = round;
+  window.dater = {stage: stage, content: content, round: round, promptId: prompt_id, answers: answers};
 
   // stages[stage](content)
 
@@ -359,6 +376,22 @@ function clientIntake(data){
     // window.questions = unescape(content).split(",");
     // window.game_prompts = [questions.splice(0, n), questions.splice(0, n), questions.splice(0, 1)]
   }
+  if (stage === "prompts"){
+    window.z = _.reduce(a, (arr, prompt) => {
+      // console.log("FUCK2", prompt.round, round, prompt.round === round, prompt.pl.includes(n));
+        if (prompt.pl.includes(n) && prompt.round == window.round){
+          console.log("FUCK");
+          arr.push(`
+            <prompt>${prompt.p}
+              <input></input>
+              <button onclick="emit('answer,${n},${prompt.round},${prompt.id},' + this.previousElementSibling.value);this.parentElement.remove();">submit</button>
+            </prompt>
+          `)
+        }
+        return arr;
+    },[])
+    $("gameview").html(z)
+  }
   if (stage === "answers"){
     console.log("prompt", stage, content, round);
     window.answers = JSON.parse(unescape(content))
@@ -368,6 +401,20 @@ function clientIntake(data){
     // questions.map(answer => `<input></input><button onclick="sendResponse()"><button>`)
   }
   if (stage === "vote"){
+    var prompt_text;
+    if (round == 2 || !window.answers.some((a)=> a.player_id == window.n && a.prompt_id == prompt_id)){
+      console.log("VOTE BITH ERROR", round, prompt_id);
+      var prompt_text = gp[round][prompt_id % playerList.length].p
+      var prompt_answer = window.answers.filter((b)=>{ return (b.prompt_id == prompt_id)} )
+      var prompt_ui = prompt_answer.map(pa => `<button onclick="emit('vote,${n},${pa.player_id},${pa.round_id},${pa.prompt_id}')">${pa.answer}</button>`)
+    }
+    var innerHTML = `
+      <prompt>
+        ${prompt_text}
+        ${prompt_ui}
+      </prompt>
+    `
+    if (prompt_text){$("gameview").html(innerHTML)}else{$("gameview").html("Your answer is being voted on.")}
       console.log("vote", stage, content, round);
       // $("playergame phase").addClass("hide")
       // $("playergame phase.vote").removeClass("hide")

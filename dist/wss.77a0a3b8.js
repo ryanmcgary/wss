@@ -19436,7 +19436,7 @@ function initHost() {
   window.n;
   window.phase = "lobby";
   window.round = 0;
-  window.prompt;
+  window.prompt = 0;
   window.players = [];
   window.stage = {};
   window.answers = {
@@ -19478,24 +19478,21 @@ stage.answer = function (phase, player_id, round_id, prompt_id, content) {
 };
 
 stage.processAnswers = function (phase, player_id, round_id, prompt_id, content) {
-  console.log("processAnswers");
+  console.log("processAnswers"); // if (window.round == round_id){ //0 is text, boo
 
-  if (window.round == round_id) {
-    //0 is text, boo
-    console.log("processAnswers tru");
-    answers.all.push({
-      player_id: player_id,
-      round_id: round_id,
-      prompt_id: prompt_id,
-      answer: content
-    });
-    answers[round_id].push({
-      player_id: player_id,
-      round_id: round_id,
-      prompt_id: prompt_id,
-      answer: content
-    });
-  }
+  console.log("processAnswers tru");
+  answers.all.push({
+    player_id: player_id,
+    round_id: round_id,
+    prompt_id: prompt_id,
+    answer: content
+  });
+  answers[round_id].push({
+    player_id: player_id,
+    round_id: round_id,
+    prompt_id: prompt_id,
+    answer: content
+  }); // }
 };
 
 stage.lobby = function () {
@@ -19560,25 +19557,42 @@ stage.lockInit = function () {
   stage.roundprompts();
 };
 
-stage.roundprompts = function () {
-  if (window.phase === "lobby") {
-    window.phase = "prompts"; // emit("prompts")
+stage.roundprompts = function (triggerRender) {
+  console.log("roundprompts", triggerRender, window.round), window.phase;
 
-    var timer = 20000;
+  if (window.phase === "lobby" || window.phase === "voting") {
+    window.phase = "prompts";
+    if (triggerRender) emit("prompts");
+    console.log("triggerRender", triggerRender);
+    var timer = 75000;
     var temp_answers = [];
     var gameInterval = setInterval(function () {
       if (timer > 0) {
         timer -= 1000;
         $("timer").html(timer / 1000);
+        if (window.answers[window.round].length === players.length * 2) timer = 0;
+        if (window.answers[window.round].length === players.length && window.round == 2) timer = 0;
+        console.log("fuckery", timer, window.answers[window.round].length === players.length * 2);
       } else {
         emit("answers,".concat(escape(JSON.stringify(answers[window.round]))));
         $("timer").html("");
         emit("blank");
-        window.clearInterval(gameInterval); // stage.roundvote();
+        window.clearInterval(gameInterval);
+        setTimeout(function () {
+          stage.roundvote();
+        }, 5000);
       }
     }, 1000);
   }
-}; // answers =
+}; //
+// sds vote,2,1,0,1
+// index.es6:152 Uncaught TypeError: stage[phase] is not a function
+//     at hostIntake (index.es6:152)
+//     at s.<anonymous> (index.es6:53)
+//     at s.i.emit (peerjs.min.js:46)
+//     at s._handleDataMessage (peerjs.min.js:62)
+//     at RTCDataChannel.dataC
+// answers =
 // [
 //   {round: 1, prompt_id: 1, user_id: 0, points:0, answer: "answer"},
 //   {round: 1, prompt_id: 1, user_id: 1, points:0, answer: "answer"}
@@ -19589,28 +19603,21 @@ stage.roundprompts = function () {
 // start timer
 
 
-if (!answers.some(function (a) {
-  return a.player_id == window.n && a.prompt_id == prompt_id;
-})) {
-  var prompt_text = gp[round][prompt_id].p;
-  prompt_answer = answers.filter(function (b) {
-    return b.prompt_id == prompt_id;
-  });
-  var prompt_ui = prompt_answer.map(function (pa) {
-    return "<button onclick=\"emit('vote,".concat(n, ",").concat(pa.player_id, ",").concat(pa.round_id, ",").concat(pa.prompt_id, "')\">").concat(pa.answer, "</button>");
-  });
-}
-
-var innerHTML = "\n      <prompt>\n        ".concat(prompt_text, "\n        ").concat(prompt_ui, "\n      </prompt>\n    ");
-$("gameview").html(innerHTML);
-
 stage.roundvote = function () {
-  var voteable = answers[round].unshift;
+  console.log("roundprompts", window.round, window.prompt, players.length); // if (window.prompt !== players.length){// + one is a zero index thing
 
-  if (voteable) {
+  if (window.prompt % players.length || !(window.prompt % players.length) && window.phase !== "voting") {
     window.phase = "voting";
-    var timer = 15000;
-    emit("vote");
+    var timer = 10000;
+    emit("vote,,".concat(window.round, ",").concat(window.prompt));
+
+    if (window.prompt > players.length + players.length) {
+      $("gamecode").html("DONE BRO");
+      return true;
+    }
+
+    window.prompt += 1;
+    console.log("vote cycle", "round: ".concat(window.round, ",prompt: ").concat(window.prompt));
     var gameInterval = setInterval(function () {
       if (timer > 0) {
         timer -= 1000;
@@ -19618,13 +19625,20 @@ stage.roundvote = function () {
       } else {
         $("timer").html("");
         emit("blank");
-        calculate();
+        window.clearInterval(gameInterval);
+        stage.roundvote();
       }
     }, 1000);
   } else {
     // once no more answers to vote on
-    window.round += 1;
-    stage.roundprompts();
+    if (window.round == 2) {
+      $("gamecode").html("DONE BRO");
+    } else {
+      window.round += 1;
+      emit("round,,".concat(window.round));
+      console.log("end of voting", "round:", round, "prompt:", prompt);
+      stage.roundprompts(true);
+    }
   }
 };
 
@@ -19636,14 +19650,15 @@ function clientIntake(data) {
       stage = _data$split4[0],
       content = _data$split4[1],
       round = _data$split4[2],
-      promptId = _data$split4[3],
+      prompt_id = _data$split4[3],
       answers = _data$split4[4];
 
+  if (round) window.round = round;
   window.dater = {
     stage: stage,
     content: content,
     round: round,
-    promptId: promptId,
+    promptId: prompt_id,
     answers: answers
   }; // stages[stage](content)
 
@@ -19689,6 +19704,19 @@ function clientIntake(data) {
     // window.game_prompts = [questions.splice(0, n), questions.splice(0, n), questions.splice(0, 1)]
   }
 
+  if (stage === "prompts") {
+    window.z = _.reduce(a, function (arr, prompt) {
+      // console.log("FUCK2", prompt.round, round, prompt.round === round, prompt.pl.includes(n));
+      if (prompt.pl.includes(n) && prompt.round == window.round) {
+        console.log("FUCK");
+        arr.push("\n            <prompt>".concat(prompt.p, "\n              <input></input>\n              <button onclick=\"emit('answer,").concat(n, ",").concat(prompt.round, ",").concat(prompt.id, ",' + this.previousElementSibling.value);this.parentElement.remove();\">submit</button>\n            </prompt>\n          "));
+      }
+
+      return arr;
+    }, []);
+    $("gameview").html(z);
+  }
+
   if (stage === "answers") {
     console.log("prompt", stage, content, round);
     window.answers = JSON.parse(unescape(content)); // $("playergame phase").addClass("hide")
@@ -19698,6 +19726,29 @@ function clientIntake(data) {
   }
 
   if (stage === "vote") {
+    var prompt_text;
+
+    if (round == 2 || !window.answers.some(function (a) {
+      return a.player_id == window.n && a.prompt_id == prompt_id;
+    })) {
+      console.log("VOTE BITH ERROR", round, prompt_id);
+      var prompt_text = gp[round][prompt_id % playerList.length].p;
+      var prompt_answer = window.answers.filter(function (b) {
+        return b.prompt_id == prompt_id;
+      });
+      var prompt_ui = prompt_answer.map(function (pa) {
+        return "<button onclick=\"emit('vote,".concat(n, ",").concat(pa.player_id, ",").concat(pa.round_id, ",").concat(pa.prompt_id, "')\">").concat(pa.answer, "</button>");
+      });
+    }
+
+    var innerHTML = "\n      <prompt>\n        ".concat(prompt_text, "\n        ").concat(prompt_ui, "\n      </prompt>\n    ");
+
+    if (prompt_text) {
+      $("gameview").html(innerHTML);
+    } else {
+      $("gameview").html("Your answer is being voted on.");
+    }
+
     console.log("vote", stage, content, round); // $("playergame phase").addClass("hide")
     // $("playergame phase.vote").removeClass("hide")
     // setTimer
