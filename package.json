@@ -1,0 +1,39 @@
+{
+  "dependencies": {
+    "electron-is-dev": "^1.2.0",
+    "express": "^4.17.1",
+    "lodash": "^4.17.15",
+    "remote": "^0.2.6"
+  },
+  "main": "./electron.js",
+  "engines": {
+    "node": ">=12.x",
+    "electron": ">=9.x"
+  },
+  "devDependencies": {
+    "concurrently": "^5.2.0",
+    "cross-env": "^7.0.2",
+    "electron": "^9.0.3",
+    "electron-builder": "^22.7.0",
+    "parcel-bundler": "^1.12.4",
+    "wait-on": "^5.0.1"
+  },
+  "scripts": {
+    "start": "parcel index.html",
+    "build": "parcel build index.html",
+    "electron": "concurrently \"cross-env BROWSER=none yarn start\" \"wait-on http://localhost:1234 && electron . \""
+  },
+  "name": "wss",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ryanmcgary/wss.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ryanmcgary/wss/issues"
+  },
+  "homepage": "https://github.com/ryanmcgary/wss#readme",
+  "description": ""
+}

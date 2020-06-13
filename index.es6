@@ -6,6 +6,8 @@
 var _ = require('lodash');
 window._ = _;
 
+// const remote = require('electron').remote
+// window.remote = remote;
 // if (window.location.hostname === "localhost"){
 // 	var socket = io.connect('http://localhost:3002');
 // }else{
@@ -22,7 +24,7 @@ if (url.pathname === "/host"){ // HOST
 
   window.peer = //new Peer();
   new Peer(peerID, {
-      host: 'localhost',
+      host: 'graphedin.com',
       port: 9000,
       path: '/'
     });
@@ -95,7 +97,7 @@ function client(peer){
   var name = $("#name")[0].value
   window.name = name;
   var hostID = `wordsaladsandwich-${host}`
-  close()
+  closer()
   window.peer?.destroy();
 
   window.peer =
@@ -251,7 +253,7 @@ stage.roundprompts = function(triggerRender) {
         $("timer").html(timer / 1000);
         if (window.answers[window.round].length === players.length * 2) timer = 0;
         if (window.answers[window.round].length === players.length && window.round == 2) timer = 0;
-        console.log("fuckery", timer,window.answers[window.round].length === players.length * 2);
+        // console.log("fuckery", timer,window.answers[window.round].length === players.length * 2);
       }else{
         emit(`answers,${escape(JSON.stringify(answers[window.round]))}`)
         $("timer").html("");
@@ -290,10 +292,18 @@ stage.roundvote = function() {
   console.log("roundprompts", window.round, window.prompt, players.length);
   // if (window.prompt !== players.length){// + one is a zero index thing
   if (window.prompt % players.length || !(window.prompt % players.length) && window.phase !== "voting" ){
+    var prom = window.prompt;
     window.phase = "voting";
     var timer = 10000
     emit(`vote,,${window.round},${window.prompt}`);
-    if (window.prompt > players.length + players.length) {$("gamecode").html("DONE BRO"); return true;}
+    if (window.prompt > players.length + players.length) {
+      $("gamecode").html("DONE BRO");
+      var tt = calculateVotes();
+      for (let [key, score] of Object.entries(tt)) {
+        $("gamecode").append(`${players[key]}, ${score}<br>`)
+      }
+      return true;
+    } // END OF GAME
     window.prompt += 1;
     console.log("vote cycle", `round: ${window.round},prompt: ${window.prompt}`);
 
@@ -304,6 +314,7 @@ stage.roundvote = function() {
       }else{
         $("timer").html("");
         emit("blank")
+        calculateVotes(prom)
         window.clearInterval(gameInterval);
         stage.roundvote()
       }
@@ -311,7 +322,15 @@ stage.roundvote = function() {
   }else { // once no more answers to vote on
     if (window.round == 2){
       $("gamecode").html("DONE BRO")
+      var tt = calculateVotes();
+      for (let [key, score] of Object.entries(tt)) {
+        $("gamecode").append(`${players[key]}, ${score}<br>`)
+      }
     }else{
+      var tt = calculateVotes();
+      for (let [key, score] of Object.entries(tt)) {
+        $("gamecode").append(`${players[key]}, ${score}<br>`)
+      }
       window.round += 1;
       emit(`round,,${window.round}`);
       console.log("end of voting", "round:", round, "prompt:", prompt);
@@ -319,8 +338,72 @@ stage.roundvote = function() {
     }
   }
 }
+window.votes = [] // {voter:, votee:, round:, prompt:}
+stage.vote = function(phase, player_id, votee, round_id, prompt_id) {
+  votes.push({voter: player_id, votee: votee, round: round_id, prompt: prompt_id})
+}
+
+function calculateVotes(prompt) {
+  var finalscore = {} // var finalscore = {0:0, 1:0, 2:0}
+  players.forEach((e,i)=>{
+    finalscore[i] = 0
+  })
+
+  $("gamecode").html(``);
+
+  var c = votes.reduce(function(obj, vote){
+    obj[vote.prompt] = obj[vote.prompt] || {};
+    if (obj[vote.prompt][vote.votee]){
+        obj[vote.prompt][vote.votee] += 1;
+    }else {
+        obj[vote.prompt][vote.votee] = 1;
+    }
+    return obj
+  }, {})
+
+  for (let [prompt_key, prompt_value] of Object.entries(c)) {
+    if (prompt !== undefined && prompt != prompt_key) continue;
+    for (let [key, value] of Object.entries(c[prompt_key])) {
+      console.log(`${key}: ${value}`);
+      console.log("fuckkksdfsd", players[key], 1000, window.round)
+      if (Object.keys(c[prompt_key]).length < 2){
+
+        if (prompt !== undefined) $("gamecode").append(`${players[key]}, 1000<br>`);
+        finalscore[key] += 1000
+      }else if(value === (players.length - 2)){
+        if (prompt !== undefined) $("gamecode").append(`${players[key]}, 1500<br>`);
+        finalscore[key] += 1500
+      }else{
+        if (prompt !== undefined) $("gamecode").append(`${players[key]}, ${1000 / (players.length - 2) * value}<br>`);
+        finalscore[key] += (1000 / (players.length - 2) * value)
+        // console.log(players[key], )
+      }
+    }
+  }
+  return finalscore;
+}
+window.calculateVotes = calculateVotes;
 
 
+
+// if round == 1
+//   1000 / (players.length - 2) * number_of_votes
+//   if prompt number_of_votes = (players.length - 2) then 1200
+// if round == 2
+//   2000 / players.length * number_of_votes
+//   if prompt number_of_votes = (players.length - 2) then 2400
+
+// phase, player_id, round_id, prompt_id, content
+// vote,0,0,2,6
+// emit('vote,${n},${pa.player_id},${pa.round_id},${pa.prompt_id}')
+
+// collect answers
+//   x show voting results after each quesition
+//   x show voting results total at end
+//   vote for more than 1 item on last round
+//   new game same people
+//   new game new people
+// publish to server or electron app
 
 function clientIntake(data){
   window.datum = data;
@@ -406,7 +489,7 @@ function clientIntake(data){
       console.log("VOTE BITH ERROR", round, prompt_id);
       var prompt_text = gp[round][prompt_id % playerList.length].p
       var prompt_answer = window.answers.filter((b)=>{ return (b.prompt_id == prompt_id)} )
-      var prompt_ui = prompt_answer.map(pa => `<button onclick="emit('vote,${n},${pa.player_id},${pa.round_id},${pa.prompt_id}')">${pa.answer}</button>`)
+      var prompt_ui = prompt_answer.map(pa => `<button onclick="emit('vote,${n},${pa.player_id},${pa.round_id},${pa.prompt_id}');this.parentElement.remove()">${pa.answer}</button>`)
     }
     var innerHTML = `
       <prompt>
@@ -444,14 +527,14 @@ function recheck() {
 
 }
 
-function close() {
+function closer() {
   // for (let [key, conn] of Object.entries(DATA_FEEDS)) {
   DATA_FEEDS.forEach((conn, i) => {
     conn?.peerConnection?.close();
   });
   // }
 }
-window.close()
+closer()
 function emit(payload) {
   DATA_FEEDS.forEach((conn, i) => {
     if (conn?.peerConnection?.localDescription?.type  === "offer") // offer or answer
@@ -711,7 +794,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`Graffiti you might find in a kindergarten`
 ,`The worst thing to wear to your court trial`
 ,`A rejected crayon color`
-,`An angry review you'd give this game (Quiplash)`
+,`An angry review you'd give this game`
 ,`Bad advice for new graduates`
 ,`The best way to tell if someone is dead`
 ,`A terrible talent to have for the Miss America Pageant`

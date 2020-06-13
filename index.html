@@ -35,13 +35,25 @@
 <script type="text/javascript">
   var url = new URL(window.location.href);
   if (url.pathname !== "/host"){
-    var innerHTML = `or <a href="/host">Host a game!</a>`
-    $("join").append(innerHTML);
+    // var innerHTML = `or <a href="/host">Host a game!</a>`
+    // $("join").append(innerHTML);
+
   }else{
     $("join").addClass("hide");
-    window.onbeforeunload = function () {
-       return "Are you sure?";
-   }
+    $("body").append('<button onclick="restart()">new game / end game</button>');
+   //  window.onbeforeunload = function () {
+   //     return "Are you sure?";
+   // }
+  }
+
+  function restart() {
+    var txt;
+    if (confirm("Are you sure you want to end this game?")) {
+      txt = "You pressed OK!";
+      location.reload();
+    } else {
+      txt = "You pressed Cancel!";
+    }
   }
 </script>
 
