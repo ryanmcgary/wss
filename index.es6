@@ -24,7 +24,7 @@ if (url.pathname === "/host"){ // HOST
 
   window.peer = //new Peer();
   new Peer(peerID, {
-      host: 'graphedin.com',
+      host: 'rumpus.xyz',
       port: 9000,
       path: '/'
     });
@@ -102,7 +102,7 @@ function client(peer){
 
   window.peer =
   new Peer({
-      host: 'localhost',
+      host: 'rumpus.xyz',
       port: 9000,
       path: '/'
     });// have to initialize this every time because library won't let you delete hanged connectoin attempts

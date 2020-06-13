@@ -20,26 +20,6 @@ function createWindow() {
       : `file://${path.join(__dirname, "./dist/index.html")}`
   );
 
-  mainWindow.on('close', (e) => {
-      const options = {
-        type: 'question',
-        buttons: ['Cancel', 'Yes, please', 'No, thanks'],
-        defaultId: 2,
-        title: 'Question',
-        message: 'Do you want to do this?',
-        detail: 'It does not really matter',
-        checkboxLabel: 'Remember my answer',
-        checkboxChecked: true,
-      };
-
-      dialog.showMessageBox(null, options, (response, checkboxChecked) => {
-        console.log(response);
-        console.log(checkboxChecked);
-      });
-      if (bToStop) {
-          e.preventDefault();
-      }
-  })
 
   mainWindow.on("closed", () => (mainWindow = null));
 }
