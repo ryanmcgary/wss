@@ -1,3 +1,146 @@
+// const fs = require('fs')
+
+// var chars_folder = './data/characters'
+// var characters = fs.readdirSync(chars_folder)
+// var chars_folder = './data/characters/cartoon1.gif'
+// var characters = fs.readFileSync(chars_folder)
+
+
+window.characters = ["cartoon1.gif","cartoon2.gif","cartoon3.gif","cartoon3.gif","cartoon3.gif","cartoon3.gif","cartoon3.gif","cartoon3.gif","cartoon3.gif"];
+window.videos = ['city.mp4','clouds.mp4','jelly.mp4','lava.mp4','liquidvisual.mp4','rainbow.mp4','turntable.mp4','water.mp4','woods.mp4','zigzag.mp4'];
+// for (file of chars) {
+//   console.log(file)
+// }
+
+const introRound1 = ["./data/audio/introround1.m4a"] //'./data/introRound1' first to fire after a player start of game
+const answerCountdown = ["./data/audio10.m4a"] //'./data/answerCountdown'
+const answerCountdownDone = ["./data/audio/answercountdowndone.m4a"] //'./data/answerCountdownDone'
+  const voteStart = ["./data/audio/votestart.m4a"] //'./data/voteStart'
+  const voteComplete = ["./data/audio/votecomplete.m4a"] //'./data/voteComplete'
+const wrapupRound1 = ["./data/audio/wrapupround1.m4a"] //'./data/wrapupRound1'
+
+const introRound2 = ["./data/audio/introround2.m4a"] //'./data/introRound2'
+// const answerCountdown = ["./data/audio10.m4a"] //'./data/answerCountdown'
+// const answerCountdownDone = ["./data/audio10.m4a"] //'./data/answerCountdownDone'
+  // const voteStart = ["./data/audio10.m4a"] //'./data/voteStart'
+  // const voteComplete = ["./data/audio10.m4a"] //'./data/voteComplete'
+const wrapupRound2 = ["./data/audio/wrapupround2.m4a"] //'./data/wrapupRound2'
+
+const introRoundFinal = ["./data/audio10.m4a"] //'./data/introRoundFinal'
+// const answerCountdown = ["./data/audio10.m4a"] //'./data/answerCountdown'
+// const answerCountdownDone = ["./data/audio10.m4a"] //'./data/answerCountdownDone'
+// const voteStart = ["./data/audio10.m4a"] //'./data/voteStart'
+// const voteComplete = ["./data/audio10.m4a"] //'./data/voteComplete'
+const wrapupRoundFinal = ["./data/audio/wrapuproundfinal.m4a"] //'./data/wrapupRoundFinal'
+
+const endGame = ["./data/audio10.m4a"] //'./data/endGame'
+
+
+const vidIntroRound1 = ["./data/bfc.mp4"] //'./data/introRound1'
+const vidAnswerCountdown = ["./data/bfc.mp4"] //'./data/answerCountdown'
+const vidAnswerCountdownDone = ["./data/bfc.mp4"] //'./data/answerCountdownDone'
+  const vidVoteStart = ["./data/bfc.mp4"] //'./data/voteStart'
+  const vidVoteComplete = ["./data/bfc.mp4"] //'./data/voteComplete'
+const vidWrapupRound1 = ["./data/bfc.mp4"] //'./data/wrapupRound1'
+const vidIntroRound2 = ["./data/bfc.mp4"] //'./data/introRound2'
+// const vidAnswerCountdown = ["./data/bfc.mp4"] //'./data/answerCountdown'
+// const vidAnswerCountdownDone = ["./data/bfc.mp4"] //'./data/answerCountdownDone'
+  // const vidVoteStart = ["./data/bfc.mp4"] //'./data/voteStart'
+  // const vidVoteComplete = ["./data/bfc.mp4"] //'./data/voteComplete'
+const vidWrapupRound2 = ["./data/bfc.mp4"] //'./data/wrapupRound2'
+const vidIntroRoundFinal = ["./data/bfc.mp4"] //'./data/introRoundFinal'
+// const vidAnswerCountdown = ["./data/bfc.mp4"] //'./data/answerCountdown'
+// const vidAnswerCountdownDone = ["./data/bfc.mp4"] //'./data/answerCountdownDone'
+// const vidVoteStart = ["./data/bfc.mp4"] //'./data/voteStart'
+// const vidVoteComplete = ["./data/bfc.mp4"] //'./data/voteComplete'
+const vidWrapupRoundFinal = ["./data/bfc.mp4"] //'./data/wrapupRoundFinal'
+const vidEndGame = ["./data/bfc.mp4"] //'./data/endGame'
+
+$(document).ready(function() {
+  if (url.pathname === "/host"){
+    changeVideo()
+  }else{
+    $("video").remove();
+  }
+})
+
+async function changeVideo() {
+  var jam = $("video.bg")
+  $("video.bg").before(`<video src="/data/videos/${shuffle(videos)[0]}" class="bg" loop="true" autoplay=""></video>`)
+  await sleep(150)
+  $(jam).addClass("remove");
+  await sleep(1000)
+  $(jam).remove();
+}
+
+
+
+
+// const files = fs.readdirSync(dir)
+// for (file of files) {
+//   console.log(file)
+// }
+
+// `<audio preload src="${introRound1[0]}"></audio>`
+// var audio = $.parseHTML(`<audio autoplay src="${introRound1[0]}"></audio>`)
+
+// window.aud = playAudio(shuffle(src)[0])
+// changeVideo()
+// await sleep(5000)
+// aud.pause()
+
+
+function playAudio(src){
+  var audio = $.parseHTML(`<audio autoplay src="${src}"></audio>`)[0]
+  $("body").append(audio)
+  // audio.pause()
+  return audio;
+}
+// playAudio("./data/audio10.m4a")
+
+// function $e(html) {
+//     var template = document.createElement('template');
+//     html = html.trim(); // Never return a text node of whitespace as the result
+//     template.innerHTML = html;
+//     return template.content.firstChild;
+// }
+// window.$e = $e;
+// what is left?
+  // x figure out where to add pauses
+  // cadence and pauses
+  //   after game start > alright everyone, lets get started! Here's how it works
+  //   send prompts > start playing countdown and countdown A/V
+  //   timer ends, play we got your questions, oh boy they suck, you know who you are
+  //   display prompt the first question is:
+  //     your first prompt is: read prompt
+  //     moving on: read prompt
+  //     your next prompt: read prompt
+  //     last question of the round: read prompt
+  //   show answer options, SAY: profound
+  //   play results of voting
+  //   PLAY
+  //     ok that's the end of round 1, lets go to the scoreboard!
+  //   display scoreboard at 0, add points, rearrange players
+  //   clear scoreboard
+  //   ok everyone, round 2 everything is worth double points
+  //   type in your answers now!
+  //   hmmm.... ok, weird.. but here we go
+  //   your first question is: >>>
+  //   and the answers are:
+  //   play results of voting
+  //   PLAY
+  //     ok that's the end of round 2, lets go to the scoreboard!
+  //   display scoreboard, add points, rearrange players
+  //   clear scoreboard
+  //   ok everyone, final round, everyone gets the same prompt and you'll vote on them
+  //     type in your answer now!
+  //   those were interesting, now vote on your gold silver and bronze picks!
+  //   show answers and play countdown music
+  //   say, ok let's see how everyone did.
+  //   play results of gold, silver bronze
+  //   And we have a winner! yay! Good job Everyone.
+  //   cut to lobby screen. same players, new players.
+
 
 // var url = new URL(window.location.href);
 // window.building = url.searchParams.get("name") || url.pathname.split("/").slice(-1)[0] || (url.searchParams.get("x") ? Math.random().toString(36).substring(2) + Date.now().toString(36) : "demoroom")
@@ -32,7 +175,7 @@ if (url.pathname === "/host"){ // HOST
   peer.on("open", function(id) {
     console.log("established" ,id)
     if (id === peerID)
-      $("gamecode").text(code)
+      $("gamecode").html(`<h2>${code}</h2>`)
   });
   peer.on('error', function(err) {
       console.log("Error: ", err);
@@ -175,6 +318,9 @@ stage.processAnswers = function(phase, player_id, round_id, prompt_id, content) 
     console.log("processAnswers tru");
     answers.all.push({player_id: player_id, round_id: round_id, prompt_id: prompt_id, answer: content})
     answers[round_id].push({player_id: player_id, round_id: round_id, prompt_id: prompt_id, answer: content})
+    if (answers.all.filter(ans => (ans.round_id == round_id && ans.player_id == player_id)).length == 1){
+      $(`#${player_id}`).removeClass("waiting");
+    }
   // }
 }
 
@@ -190,19 +336,17 @@ stage.lobby = function() {
   var clientArrayFlat = clientArray.flat().filter(Boolean)
   players = [...new Set(clientArrayFlat)]
 
-  var style=`<style>player{display:block;}</style>`
-  var playersView = players.map(player => `<player>${player}</player>`).join("")
+  var playersView = players.map((player, i) => `<player id="${i}"><img src="./data/characters/${characters[i]}"><p>${player}</p></player>`).join("")
   var innerHTML = `
     <gameview>
-      ${style}
       ${playersView}
     </gameview>
   `
   $("gameview").replaceWith(innerHTML);
-
+  // STEP:1 Render Initial Lobby
   emit(`lobby,${escape(players.toString())}`)
 }
-stage.lockInit = function() {
+stage.lockInit = async function() {
   // players
     var clientArray = _.reduce(peer.connections, (arr, conns)=>{
       var meta = _.reduce(conns, (arr, conn)=>{
@@ -235,33 +379,55 @@ stage.lockInit = function() {
       gp[2][0]["round"] = 2;
       (gp[2][0]["pl"] = gp[2][0]["pl"] || []).push(i);
     })
-    emit(`promptList,${escape(JSON.stringify(gp))}`);
-    stage.roundprompts();
+    window.player_prompts = gp.flat();
+    // STEP:2 Game start button pressed: Send prompts and trigger first item
+      console.log("introRound1");
+      changeVideo()
+      $("gamecode").html("<h2>Round 1</h2>");
+      await sleep(300)
+      $("player").addClass("waiting");
+      window.aud = playAudio(shuffle(introRound1)[0])
+      await sleep(5000)
+      aud.pause()
+    emit(`promptList,${escape(JSON.stringify(gp))}`); // sends prompts and triggers first round of answer gathering
+    stage.roundprompts(); // starts roundprompt loop and the timer on host
 }
+
+const sleep = m => new Promise(r => setTimeout(r, m))
+window.sleep = sleep;
 
 stage.roundprompts = function(triggerRender) {
   console.log("roundprompts", triggerRender, window.round), window.phase;
   if (window.phase === "lobby" || window.phase === "voting"){
     window.phase = "prompts";
-    if (triggerRender) emit(`prompts`);
+
+    if (triggerRender){ emit(`prompts`); $("player").addClass("waiting");}
     console.log("triggerRender", triggerRender);
     var timer = 75000
     var temp_answers = []
-    var gameInterval = setInterval(function () {
+    var gameInterval = setInterval(async function () {
       if (timer > 0){
         timer -= 1000
         $("timer").html(timer / 1000);
         if (window.answers[window.round].length === players.length * 2) timer = 0;
+        if (window.answers[window.round].length === 1 && players.length === 1) timer = 0; // for testing with 1 player
         if (window.answers[window.round].length === players.length && window.round == 2) timer = 0;
         // console.log("fuckery", timer,window.answers[window.round].length === players.length * 2);
       }else{
-        emit(`answers,${escape(JSON.stringify(answers[window.round]))}`)
+        emit(`answers,${escape(JSON.stringify(answers[window.round]))}`) // this just sends answers, does not start voting
         $("timer").html("");
         emit("blank");
         window.clearInterval(gameInterval);
-        setTimeout(function () {
-          stage.roundvote();
-        }, 5000);
+        // STEP:3 answers timer is up, now we send answers and get responses
+          console.log("answerCountdownDone");
+          window.aud = playAudio(shuffle(answerCountdownDone)[0])
+          $("player").addClass("scale-out");
+          await sleep(600)
+          $("gamecode").html("");
+          changeVideo()
+          await sleep(5000)
+          aud.pause()
+        stage.roundvote();
       }
     }, 1000);
   }
@@ -288,16 +454,28 @@ stage.roundprompts = function(triggerRender) {
 
 
 
-stage.roundvote = function() {
+stage.roundvote = async function() {
   console.log("roundprompts", window.round, window.prompt, players.length);
   // if (window.prompt !== players.length){// + one is a zero index thing
   if (window.prompt % players.length || !(window.prompt % players.length) && window.phase !== "voting" ){
+    // STEP:4 Start voting
+      console.log("voteStart");
+      var prompt_text = player_prompts.filter(p => p.id == window.prompt)[0]?.p
+      var answees = answers.all.filter(ans => (ans.prompt_id == window.prompt)).map(answer => `<answer player="${answer.player_id}"><p>${answer.answer}</p></answer>`)
+      $("prompt").text(prompt_text)
+      $("answers").html("");
+      window.aud = playAudio(shuffle(voteStart)[0])
+      changeVideo()
+      await sleep(5000)
+      $("answers").html(answees);
+      aud.pause()
     var prom = window.prompt;
     window.phase = "voting";
     var timer = 10000
     emit(`vote,,${window.round},${window.prompt}`);
-    if (window.prompt > players.length + players.length) {
+    if (window.prompt > players.length + players.length) { // if prompt is greater than twice number of players then it's the last item
       $("gamecode").html("DONE BRO");
+      $("answers, prompt").html("")
       var tt = calculateVotes();
       for (let [key, score] of Object.entries(tt)) {
         $("gamecode").append(`${players[key]}, ${score}<br>`)
@@ -307,33 +485,85 @@ stage.roundvote = function() {
     window.prompt += 1;
     console.log("vote cycle", `round: ${window.round},prompt: ${window.prompt}`);
 
-    var gameInterval = setInterval(function () {
+    var gameInterval = setInterval(async function () {
       if (timer > 0){
         timer -= 1000
         $("timer").html(timer / 1000);
       }else{
         $("timer").html("");
         emit("blank")
-        calculateVotes(prom)
         window.clearInterval(gameInterval);
+        // STEP:5 tabulate vote score
+          console.log("voteComplete");
+          window.aud = playAudio(shuffle(voteComplete)[0])
+          await sleep(2000)
+        var tt = calculateVotes(prom)
+        for (let [key, score] of Object.entries(tt)) {
+          $(`[player=${key}]`).append(`<p>${players[key]}</p>`)
+
+          var sxam = votes.filter(vote => vote.prompt == prom && vote.votee == key).map((vote)=>{
+            return `<div class="vvv"><player id="${vote.voter}"><p>${players[vote.voter]}</p><img src="./data/characters/${characters[vote.voter]}"></player></div>`
+          }).join("")
+
+          $(`[player=${key}]`).append(sxam)
+        }
+        // STEP:5 tabulate vote score
+          await sleep(5000);
+          aud.pause()
         stage.roundvote()
       }
     }, 1000);
   }else { // once no more answers to vote on
     if (window.round == 2){
-      $("gamecode").html("DONE BRO")
+      $("answers, prompt").html("")
+      // STEP:FINAL
+        console.log("wrapupRoundFinal");
+        window.aud = playAudio(shuffle(wrapupRoundFinal)[0])
+        changeVideo()
       var tt = calculateVotes();
       for (let [key, score] of Object.entries(tt)) {
         $("gamecode").append(`${players[key]}, ${score}<br>`)
       }
+        await sleep(7000)
+        aud.pause()
     }else{
+      // STEP:6 end round and show scores
+        if (window.round == 0){
+          console.log("wrapupRound1");
+          window.aud = playAudio(shuffle(wrapupRound1)[0]);
+        }
+        if (window.round == 1){
+          console.log("wrapupRound2");
+          window.aud = playAudio(shuffle(wrapupRound2)[0]);
+        }
+        $("answers, prompt").html("")
       var tt = calculateVotes();
       for (let [key, score] of Object.entries(tt)) {
         $("gamecode").append(`${players[key]}, ${score}<br>`)
       }
+        await sleep(7000)
+        aud.pause()
+        $("gamecode").html("")
       window.round += 1;
       emit(`round,,${window.round}`);
       console.log("end of voting", "round:", round, "prompt:", prompt);
+      // STEP:7 START next round
+        if (window.round == 2){
+          console.log("introRoundFinal");
+          window.aud = playAudio(shuffle(introRoundFinal)[0])
+          $("gamecode").html("<h2>Final Round!</h2>");
+          await sleep(1000)
+          $("player").removeClass("scale-out")
+        }
+        if (window.round == 1){
+          console.log("introRound2");
+          window.aud = playAudio(shuffle(introRound2)[0])
+          $("gamecode").html("<h2>Round 2</h2>");
+          await sleep(1000)
+          $("player").removeClass("scale-out")
+          await sleep(6000)
+          aud.pause()
+        }
       stage.roundprompts(true);
     }
   }
@@ -344,10 +574,18 @@ stage.vote = function(phase, player_id, votee, round_id, prompt_id) {
 }
 
 function calculateVotes(prompt) {
+  if (prompt !== undefined) prompt_array = Array.from(arguments);
   var finalscore = {} // var finalscore = {0:0, 1:0, 2:0}
-  players.forEach((e,i)=>{
-    finalscore[i] = 0
-  })
+
+  if (prompt !== undefined){
+    player_prompts
+    .filter((d)=>{return prompt_array.includes(Number(d.id))})
+    .forEach(p => p.pl.forEach(e => finalscore[e] = 0))
+  }else{
+    players.forEach((e,i)=>{
+      finalscore[i] = 0
+    })
+  }
 
   $("gamecode").html(``);
   prompt_round = {}
@@ -371,45 +609,51 @@ function calculateVotes(prompt) {
     }, {})
 
     for (let [prompt_key, prompt_value] of Object.entries(c)) { // iterate through promopts
-      if (prompt !== undefined && prompt != prompt_key || prompt == last_prompt) continue; // only process single prompt if argument passed
-      for (let [key, value] of Object.entries(c[prompt_key])) { // key is player number, value is vote count
-        console.log(`${key}: ${value}`);
-        console.log("fuckkksdfsd", players[key], 1000, window.round)
-        if(value === (players.length - 2)){ // if vote count of prompt equals player count -2 it's a unamious vote of eligable voters give bonus
-          var score = 1500 * x[prompt_key]
-          if (prompt !== undefined) $("gamecode").append(`${players[key]}, ${score}<br>`);
-          finalscore[key] += score
-        }else
-        if (Object.keys(c[prompt_key]).length < 2){ // if only 1 answer got votes give full round score
-          var score = 1000 * x[prompt_key] // x is round mapping for prompts
-          if (prompt !== undefined) $("gamecode").append(`${players[key]}, ${score}<br>`);
-          finalscore[key] += score
-        }else{ // else, divide point total based on percentage votes
-          var score = (1000 / (players.length - 2) * value) * x[prompt_key]
-          if (prompt !== undefined) $("gamecode").append(`${players[key]}, ${score}<br>`);
-          finalscore[key] += score
-          // console.log(players[key], )
+
+      if (prompt !== undefined && !prompt_array.includes(Number(prompt_key))) continue; // only process single prompt if argument passed
+      if (prompt_key != last_prompt){
+        for (let [key, value] of Object.entries(c[prompt_key])) { // key is player number, value is vote count
+          console.log(`${key}: ${value}`);
+          console.log("fuckkksdfsd", players[key], 1000, window.round)
+          if(value === (players.length - 2)){ // if vote count of prompt equals player count -2 it's a unamious vote of eligable voters give bonus
+            var score = 1500 * x[prompt_key]
+            // if (prompt !== undefined) $("gamecode").append(`${players[key]}, ${score}<br>`);
+            finalscore[key] += score
+          }else
+          if (Object.keys(c[prompt_key]).length < 2){ // if only 1 answer got votes give full round score
+            var score = 1000 * x[prompt_key] // x is round mapping for prompts
+            // if (prompt !== undefined) $("gamecode").append(`${players[key]}, ${score}<br>`);
+            finalscore[key] += score
+          }else{ // else, divide point total based on percentage votes
+            var score = (1000 / (players.length - 2) * value) * x[prompt_key]
+            // if (prompt !== undefined) $("gamecode").append(`${players[key]}, ${score}<br>`);
+            finalscore[key] += score
+            // console.log(players[key], )
+          }
         }
       }
+      if (prompt_key == last_prompt){
+        console.log("FFFFFFFFF");
+        var z = votes.reduce(function(obj, vote){
+          if (vote.prompt == last_prompt){
+            obj[vote.voter].push({user:vote.votee, val:obj[vote.voter].length})
+          }
+          return obj;
+        },{0:[],1:[],2:[]})
+
+        // var lastRoundPoints = {0:0,1:0,2:0};
+        for (let [user, votes] of Object.entries(z)) {
+          votes.forEach((vote)=>{
+            if (vote.val === 0) {finalscore[vote.user] += 1000;}
+            if (vote.val === 1) {finalscore[vote.user] += 700;}
+            if (vote.val === 2) {finalscore[vote.user] += 500;}
+          })
+        };
+      }
+
     }
 
-    if (prompt === undefined && last_prompt || last_prompt == prompt){
-      var z = votes.reduce(function(obj, vote){
-        if (vote.prompt == last_prompt){
-          obj[vote.voter].push({user:vote.votee, val:obj[vote.voter].length})
-        }
-        return obj;
-      },{0:[],1:[],2:[]})
 
-      // var lastRoundPoints = {0:0,1:0,2:0};
-      for (let [user, votes] of Object.entries(z)) {
-        votes.forEach((vote)=>{
-          if (vote.val === 0) {finalscore[vote.user] += 1000;}
-          if (vote.val === 1) {finalscore[vote.user] += 700;}
-          if (vote.val === 2) {finalscore[vote.user] += 500;}
-        })
-      };
-    }
 
     return finalscore;
 }
@@ -436,9 +680,12 @@ function lastRoundCalculate() {
 // collect answers
 //   x show voting results after each quesition
 //   x show voting results total at end
-//   vote for more than 1 item on last round
+//   x vote for more than 1 item on last round
+//   add video placeholders and timers
 //   new game same people
 //   new game new people
+//   animate characters
+//   send to collin
 // publish to server or electron app
 
 function clientIntake(data){
@@ -523,11 +770,15 @@ function clientIntake(data){
     var prompt_text;
     if (round == 2 || !window.answers.some((a)=> a.player_id == window.n && a.prompt_id == prompt_id)){
       console.log("VOTE BITH ERROR", round, prompt_id);
-      var prompt_text = gp[round][prompt_id % playerList.length].p
+      var prompt_text = gp[round][prompt_id % playerList.length]?.p
       var prompt_answer = window.answers.filter((b)=>{ return (b.prompt_id == prompt_id)} )
       var prompt_ui = prompt_answer.map(pa => `<button onclick="emit('vote,${n},${pa.player_id},${pa.round_id},${pa.prompt_id}');this.parentElement.remove()">${pa.answer}</button>`)
       if (round == 2){
-        prompt_ui = prompt_answer.map(pa => `<button onclick="emit('vote,${n},${pa.player_id},${pa.round_id},${pa.prompt_id}');this.remove()">${pa.answer}</button>`)
+        prompt_ui = prompt_answer.map(pa =>{
+          if (window.n != pa.player_id){
+            return `<button onclick="emit('vote,${n},${pa.player_id},${pa.round_id},${pa.prompt_id}');this.remove()">${pa.answer}</button>`
+          }
+        }).filter(item => !!item);
       }
     }
     var innerHTML = `
@@ -1506,7 +1757,6 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`The worst name for a "big and tall" store`
 ,`The name of a shampoo for hippies`
 ,`A new name for kumquats`
-,`An angry review you'd give this game (Quiplash)`
 ,`The worst thing to wear to your court trial`
 ,`A rejected crayon color`
 ,`Graffiti you might find in a kindergarten`
