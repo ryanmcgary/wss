@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>Word Salad Sandwich!</title>
+  <title>Enter your code at Rumpus.XYZ</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -55,7 +55,7 @@
         transform 0.5s ease;
     }
     player img{
-      height: 206px;
+      height: 135px;
       filter: drop-shadow(2px 5px 7px #222);
     }
     player p {text-align: center;font-size: 1.5em;}
@@ -196,6 +196,7 @@
   }
 
   function again() {
+    emit("blank");
     window.clearInterval(gameInterval);
     initHost();
     stage.lockInit();

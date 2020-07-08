@@ -6,7 +6,7 @@
 // var characters = fs.readFileSync(chars_folder)
 
 
-window.characters = ["cartoon1.gif","cartoon2.gif","cartoon3.gif","cartoon3.gif","cartoon3.gif","cartoon3.gif","cartoon3.gif","cartoon3.gif","cartoon3.gif"];
+window.characters = shuffle(["cartoon1.gif","cartoon2.gif","cartoon3.gif","cartoon4.gif","cartoon5.gif","cartoon6.gif","cartoon7.gif","cartoon8.gif","cartoon9.gif"]);
 window.videos = ['city.mp4','clouds.mp4','jelly.mp4','lava.mp4','liquidvisual.mp4','rainbow.mp4','turntable.mp4','water.mp4','woods.mp4','zigzag.mp4'];
 // for (file of chars) {
 //   console.log(file)
@@ -483,7 +483,8 @@ stage.roundvote = async function() {
       aud.pause()
     var prom = window.prompt;
     window.phase = "voting";
-    var timer = 10000
+    var timer = 12000
+    if (window.round == 2) timer = 19000;
     emit(`vote,,${window.round},${window.prompt}`);
     if (window.prompt > players.length + players.length) { // if prompt is greater than twice number of players then it's the last item
       $("gamecode").html("DONE BRO");
@@ -494,7 +495,7 @@ stage.roundvote = async function() {
           `<score>
             <img src="./data/characters/${characters[key]}">
             <p class="name">${fitText(key)}</p>
-            <p class="score">${score}</p>
+            <p class="score">${parseInt(score)}</p>
           </score>`
         )
       }
@@ -544,7 +545,7 @@ stage.roundvote = async function() {
           `<score>
             <img src="./data/characters/${characters[key]}">
             <p class="name">${fitText(key)}</p>
-            <p class="score">${score}</p>
+            <p class="score">${parseInt(score)}</p>
           </score>`
         )
       }
@@ -567,7 +568,7 @@ stage.roundvote = async function() {
           `<score>
             <img src="./data/characters/${characters[key]}">
             <p class="name">${fitText(key)}</p>
-            <p class="score">${score}</p>
+            <p class="score">${parseInt(score)}</p>
           </score>`
         )
       }
@@ -649,16 +650,16 @@ function calculateVotes(prompt) {
           console.log("fuckkksdfsd", players[key], 1000, window.round)
           if(value === (players.length - 2)){ // if vote count of prompt equals player count -2 it's a unamious vote of eligable voters give bonus
             var score = 1500 * x[prompt_key]
-            // if (prompt !== undefined) $("gamecode").append(`${players[key]}, ${score}<br>`);
+            // if (prompt !== undefined) $("gamecode").append(`${players[key]}, ${parseInt(score)}<br>`);
             finalscore[key] += score
           }else
           if (Object.keys(c[prompt_key]).length < 2){ // if only 1 answer got votes give full round score
             var score = 1000 * x[prompt_key] // x is round mapping for prompts
-            // if (prompt !== undefined) $("gamecode").append(`${players[key]}, ${score}<br>`);
+            // if (prompt !== undefined) $("gamecode").append(`${players[key]}, ${parseInt(score)}<br>`);
             finalscore[key] += score
           }else{ // else, divide point total based on percentage votes
             var score = (1000 / (players.length - 2) * value) * x[prompt_key]
-            // if (prompt !== undefined) $("gamecode").append(`${players[key]}, ${score}<br>`);
+            // if (prompt !== undefined) $("gamecode").append(`${players[key]}, ${parseInt(score)}<br>`);
             finalscore[key] += score
             // console.log(players[key], )
           }
