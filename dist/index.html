@@ -4,7 +4,36 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <style>gameview {
+  <style>score p.score{
+      background-color: rgba(0, 0, 0, 0.0);
+      padding: 5px 20px;
+      margin-block-start: 0px;
+      font-size: 36px;
+    }
+    score img{
+      width: 62px;
+    }
+    score p.name{height: 69px;}
+    score p{
+      background-color: black;
+      margin-block-start: 0px;
+      margin-block-end: 0px;
+      margin-top: -45px;
+    }
+    score{
+      display: inline-block;
+      padding: 4px;
+      margin: 10px;
+      vertical-align: top;
+    }
+    score svg {width:100%;height:100%;}
+    score svg text {
+      fill: aliceblue;
+      font-size: initial;
+      font-family: monospace;
+      font-weight: bolder;
+    }
+    gameview {
       display: inline-flex;
     }
     gameview prompt{
@@ -106,9 +135,29 @@
     }
 
     .hide{display: none;}</style>
+
+  <script>var globalProps = [];
+
+function readGlobalProps() {
+  globalProps = Object.getOwnPropertyNames(window);
+}
+
+function findNewEntries() {
+  var currentPropList = Object.getOwnPropertyNames(window);
+  return currentPropList.filter(findDuplicate);
+
+  function findDuplicate(propName) {
+    return globalProps.indexOf(propName) === -1;
+  }
+}
+
+readGlobalProps();</script>
+
   <script src="https://code.jquery.com/jquery-3.0.0.min.js" charset="utf-8"></script>
   <!-- <script src="https://cdn.jsdelivr.net/npm/peerjs@0.3.20/dist/peer.min.js"></script> -->
   <script src="https://cdn.jsdelivr.net/npm/peerjs@1.2.0/dist/peerjs.min.js"></script>
+  <script>readGlobalProps();</script>
+
   <script defer="" src="/wss.77a0a3b8.js" charset="utf-8"></script>
 </head>
 <body>
@@ -132,9 +181,17 @@ if (url.pathname !== "/host") {// var innerHTML = `or <a href="/host">Host a gam
   // $("join").append(innerHTML);
 } else {
   $("join").addClass("hide");
-  $("body").append('<div class="restart"><button onclick="restart()">new game / end game</button></div>'); //  window.onbeforeunload = function () {
+  $("body").append('<div class="restart"><div><button onclick="restart()">new game / end game</button></div><div><button onclick="again()">Again, Same Players</button></div></div>'); //  window.onbeforeunload = function () {
   //     return "Are you sure?";
   // }
+}
+
+function again() {
+  window.clearInterval(gameInterval);
+  initHost();
+  stage.lockInit();
+  $("answers, prompt").html("");
+  $("timer").html("");
 }
 
 function restart() {

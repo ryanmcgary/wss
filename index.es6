@@ -286,11 +286,14 @@ function initHost(){
   window.phase = "lobby"
   window.round = 0
   window.prompt = 0;
-  window.players=[];
-  window.stage={};
+  window.players = (window.players || []);
+  window.stage = (window.stage || {});
   window.answers = {all:[], 0:[],1:[],2:[]}
+
+  // ["n", "j", "z", "player_prompts", "lastData", "lastConn", "aud", "prompt_array", "prompt_round", "last_prompt"]
 }
 initHost()
+window.initHost = initHost;
 
 function hostIntake(user, data){
   var [phase, player_id, round_id, prompt_id, content] = data.split(",")
@@ -405,7 +408,7 @@ stage.roundprompts = function(triggerRender) {
     console.log("triggerRender", triggerRender);
     var timer = 75000
     var temp_answers = []
-    var gameInterval = setInterval(async function () {
+    window.gameInterval = setInterval(async function () {
       if (timer > 0){
         timer -= 1000
         $("timer").html(timer / 1000);
@@ -452,7 +455,16 @@ stage.roundprompts = function(triggerRender) {
   // client
     // start timer
 
-
+function fitText(id){
+  var x = 0;
+  var width = players[id].length * 7.84;
+  if (width < 79){
+    width = 79;
+    x = 39 - (4 * players[id].length)
+  }
+  return `<svg viewBox="0 0 ${width} 18"><text x="${x}" y="75%">${players[id]}</text></svg>`
+}
+window.fitText = fitText;
 
 stage.roundvote = async function() {
   console.log("roundprompts", window.round, window.prompt, players.length);
@@ -478,14 +490,20 @@ stage.roundvote = async function() {
       $("answers, prompt").html("")
       var tt = calculateVotes();
       for (let [key, score] of Object.entries(tt)) {
-        $("gamecode").append(`${players[key]}, ${score}<br>`)
+        $("gamecode").append(
+          `<score>
+            <img src="./data/characters/${characters[key]}">
+            <p class="name">${fitText(key)}</p>
+            <p class="score">${score}</p>
+          </score>`
+        )
       }
       return true;
     } // END OF GAME
     window.prompt += 1;
     console.log("vote cycle", `round: ${window.round},prompt: ${window.prompt}`);
 
-    var gameInterval = setInterval(async function () {
+    window.gameInterval = setInterval(async function () {
       if (timer > 0){
         timer -= 1000
         $("timer").html(timer / 1000);
@@ -522,7 +540,13 @@ stage.roundvote = async function() {
         changeVideo()
       var tt = calculateVotes();
       for (let [key, score] of Object.entries(tt)) {
-        $("gamecode").append(`${players[key]}, ${score}<br>`)
+        $("gamecode").append(
+          `<score>
+            <img src="./data/characters/${characters[key]}">
+            <p class="name">${fitText(key)}</p>
+            <p class="score">${score}</p>
+          </score>`
+        )
       }
         await sleep(7000)
         aud.pause()
@@ -539,7 +563,13 @@ stage.roundvote = async function() {
         $("answers, prompt").html("")
       var tt = calculateVotes();
       for (let [key, score] of Object.entries(tt)) {
-        $("gamecode").append(`${players[key]}, ${score}<br>`)
+        $("gamecode").append(
+          `<score>
+            <img src="./data/characters/${characters[key]}">
+            <p class="name">${fitText(key)}</p>
+            <p class="score">${score}</p>
+          </score>`
+        )
       }
         await sleep(7000)
         aud.pause()
@@ -572,6 +602,8 @@ window.votes = [] // {voter:, votee:, round:, prompt:}
 stage.vote = function(phase, player_id, votee, round_id, prompt_id) {
   votes.push({voter: player_id, votee: votee, round: round_id, prompt: prompt_id})
 }
+
+window.stage = stage;
 
 function calculateVotes(prompt) {
   if (prompt !== undefined) prompt_array = Array.from(arguments);
@@ -711,9 +743,11 @@ function clientIntake(data){
     $("gameview").html(innerHTML);
 
   }
-  if (stage === "playerList"){
+  if (stage === "playerList"){ // and reset
       console.log("playerList",stage, content);
-      window.playerList = unescape(content).split(",")
+      window.playerList = unescape(content).split(",");
+      window.round = 0;
+      window.prompt = 0;
   }
   if (stage === "promptList"){
     console.log("promptList",stage, content);
@@ -803,6 +837,21 @@ function clientIntake(data){
   }
 }
 window.clientIntake = clientIntake;
+
+window.clientReset = function() {
+    delete datum
+    delete round
+    delete dater
+    delete playerList
+    delete n
+    delete gp
+    delete a
+    delete round
+    delete questions
+    delete game_prompts
+    delete z
+    delete answers
+}
 
 window.checked = 0
 function recheck() {
@@ -2080,3 +2129,5 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`A rejected name for the Segway`]
 
 window.prompts = prompts;
+
+["url", "restart", "characters", "videos", "_", "DATA_FEEDS", "peer", "shuffle", "offset", "makeid", "client", "phase", "round", "players", "stage", "answers", "sleep", "fitText", "votes", "calculateVotes", "clientIntake", "checked", "emit", "prompts", "dir", "dirxml", "profile", "profileEnd", "clear", "table", "keys", "values", "debug", "undebug", "monitor", "unmonitor", "inspect", "copy", "queryObjects", "$_", "$0", "$1", "$2", "$3", "$4", "getEventListeners", "monitorEvents", "unmonitorEvents", "$$", "$x"]
