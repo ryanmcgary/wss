@@ -51,7 +51,7 @@
     "dist": "electron-builder",
     "postinstall": "electron-builder install-app-deps"
   },
-  "name": "rumpus",
+  "name": "Rumpus!",
   "version": "1.0.0",
   "repository": {
     "type": "git",
