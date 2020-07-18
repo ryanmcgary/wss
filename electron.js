@@ -29,26 +29,26 @@ function createWindow() {
 
   });
 
-  // var menu = Menu.buildFromTemplate([
-  //     {
-  //         label: 'Rumpus',
-  //         submenu: [
-  //             {label:'New Game / New Code',
-  //               click() {mainWindow.webContents.executeJavaScript('restart()');}
-  //             },
-  //             {label:'Play Again (same players)',
-  //               click() {mainWindow.webContents.executeJavaScript('again()');}
-  //             },
-  //             {type:'separator'},
-  //             {label:'Exit',
-  //               click() {
-  //                   app.quit()
-  //               }
-  //             }
-  //         ]
-  //     }
-  // ])
-  // Menu.setApplicationMenu(menu);
+  var menu = Menu.buildFromTemplate([
+      {
+          label: 'Rumpus',
+          submenu: [
+              {label:'New Game / New Code',
+                click() {mainWindow.webContents.executeJavaScript('restart()');}
+              },
+              {label:'Play Again (same players)',
+                click() {mainWindow.webContents.executeJavaScript('again()');}
+              },
+              {type:'separator'},
+              {label:'Exit',
+                click() {
+                    app.quit()
+                }
+              }
+          ]
+      }
+  ])
+  Menu.setApplicationMenu(menu);
 
   mainWindow.on("closed", () => (mainWindow = null));
 }
