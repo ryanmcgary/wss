@@ -19515,7 +19515,7 @@ if (url.hash !== "#host" && !navigator.userAgent.includes("Electron")) {
         if (conn.some(arr => arr.peerConnection.connectionState === "connected")) {
           console.log('hi');
         } else {
-          client(peer, "reconnect");
+          client(peer, "reconnect", window.name, window.host);
         }
       }
     }
@@ -19641,13 +19641,13 @@ window.shuffle = shuffle;
 window.offset = offset;
 window.makeid = makeid;
 
-function client(peer, prefix = "wordsaladsandwich") {
+function client(peer, prefix = "wordsaladsandwich", name, host) {
   var _window$peer;
 
-  var host = $("#roomcode")[0].value.toUpperCase(); // window.host = host;
-
-  var name = $("#name")[0].value; // window.named = name;
-
+  var host = host || $("#roomcode")[0].value.toUpperCase();
+  window.host = host;
+  var name = name || $("#name")[0].value;
+  window.name = name;
   var hostID = `${prefix}-${host}`;
   closer();
   (_window$peer = window.peer) === null || _window$peer === void 0 ? void 0 : _window$peer.destroy();
@@ -20452,7 +20452,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53586" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55917" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

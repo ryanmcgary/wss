@@ -231,7 +231,7 @@ if (url.hash !== "#host" && !navigator.userAgent.includes("Electron")){ // HOST
     if (window.peer){
       for (let [key, conn] of Object.entries(peer.connections)) {
         if (conn.some(arr => arr.peerConnection.connectionState === "connected")){console.log('hi')}else{
-          client(peer, "reconnect")
+          client(peer, "reconnect", window.name, window.host)
         }
       }
     }
@@ -352,12 +352,12 @@ window.offset = offset;
 window.makeid = makeid;
 
 
-function client(peer, prefix = "wordsaladsandwich"){
-  var host = $("#roomcode")[0].value.toUpperCase()
-  // window.host = host;
-  var name = $("#name")[0].value
-  // window.named = name;
-  var hostID = `${prefix}-${host}`
+function client(peer, prefix = "wordsaladsandwich", name, host){
+  var host = (host || $("#roomcode")[0].value.toUpperCase());
+  window.host = host;
+  var name = (name || $("#name")[0].value);
+  window.name = name;
+  var hostID = `${prefix}-${host}`;
   closer()
   window.peer?.destroy();
 
