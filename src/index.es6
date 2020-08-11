@@ -226,17 +226,41 @@ window._ = _;
 
 var url = new URL(window.location.href);
 if (url.hash !== "#host" && !navigator.userAgent.includes("Electron")){ // HOST
-  window.onfocus = function() {
-    console.log("hey oh")
-    if (window.peer){
-      for (let [key, conn] of Object.entries(peer.connections)) {
-        if (conn.some(arr => arr.peerConnection.connectionState === "connected")){console.log('hi')}else{
-          client(peer, "reconnect", window.name, window.host)
-        }
-      }
+  $(document).ready(function() {
+    var hidden, visibilityState, visibilityChange;
+
+    if (typeof document.hidden !== "undefined") {
+      hidden = "hidden", visibilityChange = "visibilitychange", visibilityState = "visibilityState";
+    } else if (typeof document.msHidden !== "undefined") {
+      hidden = "msHidden", visibilityChange = "msvisibilitychange", visibilityState = "msVisibilityState";
     }
-  }
+
+    var document_hidden = document[hidden];
+
+    document.addEventListener(visibilityChange, function() {
+      if(document_hidden != document[hidden]) {
+        if(document[hidden]) {
+          console.log("hidden")
+        } else {
+          console.log("show")
+          if (window.peer){
+            for (let [key, conn] of Object.entries(peer.connections)) {
+              if (conn.some(arr => arr.peerConnection.connectionState === "connected")){console.log('hi')}else{
+                client(peer, "reconnect", window.name, window.host)
+              }
+            }
+          }
+        }
+
+        document_hidden = document[hidden];
+      }
+    });
+  });
+
 }
+
+
+
 window.DATA_FEEDS = [];
 
 

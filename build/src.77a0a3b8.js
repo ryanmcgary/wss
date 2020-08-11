@@ -117,7 +117,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"../../../.nvm/versions/node/v12.16.3/lib/node_modules/parcel/node_modules/base64-js/index.js":[function(require,module,exports) {
+})({"../node_modules/base64-js/index.js":[function(require,module,exports) {
 'use strict'
 
 exports.byteLength = byteLength
@@ -271,7 +271,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],"../../../.nvm/versions/node/v12.16.3/lib/node_modules/parcel/node_modules/ieee754/index.js":[function(require,module,exports) {
+},{}],"../node_modules/ieee754/index.js":[function(require,module,exports) {
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -357,14 +357,14 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],"../../../.nvm/versions/node/v12.16.3/lib/node_modules/parcel/node_modules/isarray/index.js":[function(require,module,exports) {
+},{}],"../node_modules/isarray/index.js":[function(require,module,exports) {
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],"../../../.nvm/versions/node/v12.16.3/lib/node_modules/parcel/node_modules/buffer/index.js":[function(require,module,exports) {
+},{}],"../node_modules/buffer/index.js":[function(require,module,exports) {
 
 var global = arguments[3];
 /*!
@@ -2157,7 +2157,7 @@ function isnan (val) {
   return val !== val // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":"../../../.nvm/versions/node/v12.16.3/lib/node_modules/parcel/node_modules/base64-js/index.js","ieee754":"../../../.nvm/versions/node/v12.16.3/lib/node_modules/parcel/node_modules/ieee754/index.js","isarray":"../../../.nvm/versions/node/v12.16.3/lib/node_modules/parcel/node_modules/isarray/index.js","buffer":"../../../.nvm/versions/node/v12.16.3/lib/node_modules/parcel/node_modules/buffer/index.js"}],"../node_modules/lodash/lodash.js":[function(require,module,exports) {
+},{"base64-js":"../node_modules/base64-js/index.js","ieee754":"../node_modules/ieee754/index.js","isarray":"../node_modules/isarray/index.js","buffer":"../node_modules/buffer/index.js"}],"../node_modules/lodash/lodash.js":[function(require,module,exports) {
 var global = arguments[3];
 var Buffer = require("buffer").Buffer;
 var define;
@@ -19274,7 +19274,7 @@ var define;
   }
 }.call(this));
 
-},{"buffer":"../../../.nvm/versions/node/v12.16.3/lib/node_modules/parcel/node_modules/buffer/index.js"}],"index.es6":[function(require,module,exports) {
+},{"buffer":"../node_modules/buffer/index.js"}],"index.es6":[function(require,module,exports) {
 // const fs = require('fs')
 // var chars_folder = './data/characters'
 // var characters = fs.readdirSync(chars_folder)
@@ -19507,19 +19507,38 @@ var url = new URL(window.location.href);
 
 if (url.hash !== "#host" && !navigator.userAgent.includes("Electron")) {
   // HOST
-  window.onfocus = function () {
-    console.log("hey oh");
+  $(document).ready(function () {
+    var hidden, visibilityState, visibilityChange;
 
-    if (window.peer) {
-      for (let [key, conn] of Object.entries(peer.connections)) {
-        if (conn.some(arr => arr.peerConnection.connectionState === "connected")) {
-          console.log('hi');
-        } else {
-          client(peer, "reconnect", window.name, window.host);
-        }
-      }
+    if (typeof document.hidden !== "undefined") {
+      hidden = "hidden", visibilityChange = "visibilitychange", visibilityState = "visibilityState";
+    } else if (typeof document.msHidden !== "undefined") {
+      hidden = "msHidden", visibilityChange = "msvisibilitychange", visibilityState = "msVisibilityState";
     }
-  };
+
+    var document_hidden = document[hidden];
+    document.addEventListener(visibilityChange, function () {
+      if (document_hidden != document[hidden]) {
+        if (document[hidden]) {
+          console.log("hidden");
+        } else {
+          console.log("show");
+
+          if (window.peer) {
+            for (let [key, conn] of Object.entries(peer.connections)) {
+              if (conn.some(arr => arr.peerConnection.connectionState === "connected")) {
+                console.log('hi');
+              } else {
+                client(peer, "reconnect", window.name, window.host);
+              }
+            }
+          }
+        }
+
+        document_hidden = document[hidden];
+      }
+    });
+  });
 }
 
 window.DATA_FEEDS = [];
@@ -19546,9 +19565,9 @@ if (url.hash === "#host" || navigator.userAgent.includes("Electron")) {
   peer.on('connection', function (conn) {
     // if any users disconnect after game start, reconnect to server
     conn.on('close', function () {
-      console.log('closed what', conn);
+      console.log('closed what', conn, peer.disconnected, window.phase);
 
-      if (window.phase !== "lobby" && !peer.disconnected) {
+      if (window.phase !== "lobby" && peer.disconnected) {
         ///FIXEEE
         console.log('closed', conn);
         peer._lastServerId = peerID_reconnect;
@@ -19582,11 +19601,14 @@ if (url.hash === "#host" || navigator.userAgent.includes("Electron")) {
       console.log("host open", conn, conn.peer, conn2);
 
       conn.peerConnection.onconnectionstatechange = function (event) {
-        if (window.phase !== "lobby" && !peer.disconnected) {
-          console.log('closed', conn);
+        console.log('closed what 2', conn);
+
+        if (window.phase !== "lobby" && peer.disconnected) {
+          console.log('closed if2', conn);
           peer._lastServerId = peerID_reconnect;
           peer.reconnect();
         } else if (window.phase === "lobby" && conn.peerConnection.connectionState === "failed") {
+          console.log('closed else2', conn);
           var playerIndex = players.indexOf(conn.metadata);
           if (playerIndex !== -1) players.splice(playerIndex, 1);
           window.stage.lobby();
@@ -19780,6 +19802,8 @@ stage.lobby = function () {
 };
 
 stage.lockInit = async function () {
+  var _window$peer2;
+
   // players
   var clientArray = _.reduce(peer.connections, (arr, conns) => {
     var meta = _.reduce(conns, (arr, conn) => {
@@ -19828,7 +19852,8 @@ stage.lockInit = async function () {
   emit(`promptList,${escape(JSON.stringify(gp))}`); // sends prompts and triggers first round of answer gathering
 
   stage.roundprompts(); // starts roundprompt loop and the timer on host
-  // window.peer?.disconnect()
+
+  (_window$peer2 = window.peer) === null || _window$peer2 === void 0 ? void 0 : _window$peer2.disconnect();
 };
 
 const sleep = m => new Promise(r => setTimeout(r, m));
@@ -20452,7 +20477,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60348" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64750" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
