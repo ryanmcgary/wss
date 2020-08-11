@@ -19503,25 +19503,26 @@ window._ = _; // const remote = require('electron').remote
 //   });
 // }
 
-window.onfocus = function () {
-  console.log("hey oh");
+var url = new URL(window.location.href);
 
-  if (window.peer) {
-    for (let [key, conn] of Object.entries(peer.connections)) {
-      if (conn.some(arr => arr.peerConnection.connectionState === "connected")) {
-        console.log('hi');
-      } else {
-        client(peer, "reconnect");
+if (url.hash !== "#host" && !navigator.userAgent.includes("Electron")) {
+  // HOST
+  window.onfocus = function () {
+    console.log("hey oh");
+
+    if (window.peer) {
+      for (let [key, conn] of Object.entries(peer.connections)) {
+        if (conn.some(arr => arr.peerConnection.connectionState === "connected")) {
+          console.log('hi');
+        } else {
+          client(peer, "reconnect");
+        }
       }
     }
-  } //   // confirm p2p connection then return
-  //   // connect to negotiating server
-  //   // try connection to reconnect-code
-
-};
+  };
+}
 
 window.DATA_FEEDS = [];
-var url = new URL(window.location.href);
 
 if (url.hash === "#host" || navigator.userAgent.includes("Electron")) {
   // HOST
@@ -19556,7 +19557,7 @@ if (url.hash === "#host" || navigator.userAgent.includes("Electron")) {
         // if player drops during lobby phase 
         console.log('closed else', conn);
         var playerIndex = players.indexOf(conn.metadata);
-        if (playerIndex !== -1) window.players.splice(playerIndex, 1);
+        if (playerIndex !== -1) players.splice(playerIndex, 1);
         window.stage.lobby();
       }
     });
@@ -19586,8 +19587,8 @@ if (url.hash === "#host" || navigator.userAgent.includes("Electron")) {
           peer._lastServerId = peerID_reconnect;
           peer.reconnect();
         } else if (window.phase === "lobby" && conn.peerConnection.connectionState === "failed") {
-          var playerIndex = window.players.indexOf(conn.metadata);
-          if (playerIndex !== -1) window.players.splice(playerIndex, 1);
+          var playerIndex = players.indexOf(conn.metadata);
+          if (playerIndex !== -1) players.splice(playerIndex, 1);
           window.stage.lobby();
         }
       };
@@ -19643,10 +19644,10 @@ window.makeid = makeid;
 function client(peer, prefix = "wordsaladsandwich") {
   var _window$peer;
 
-  var host = window.host || $("#roomcode")[0].value.toUpperCase();
-  window.host = host;
-  var name = window.name || $("#name")[0].value;
-  window.name = name;
+  var host = $("#roomcode")[0].value.toUpperCase(); // window.host = host;
+
+  var name = $("#name")[0].value; // window.named = name;
+
   var hostID = `${prefix}-${host}`;
   closer();
   (_window$peer = window.peer) === null || _window$peer === void 0 ? void 0 : _window$peer.destroy();
@@ -19755,8 +19756,6 @@ stage.processAnswers = function (phase, player_id, round_id, prompt_id, content)
 window.last_emitted_payload = "";
 
 stage.lobby = function () {
-  var _window$peer2;
-
   var clientArray = _.reduce(peer.connections, (arr, conns) => {
     var meta = _.reduce(conns, (arr, conn) => {
       if (conn.open && conn.peerConnection.connectionState === "connected") arr.push(conn.metadata);
@@ -19778,7 +19777,6 @@ stage.lobby = function () {
   $("gameview").replaceWith(innerHTML); // STEP:1 Render Initial Lobby
 
   emit(`lobby,${escape(players.toString())}`);
-  (_window$peer2 = window.peer) === null || _window$peer2 === void 0 ? void 0 : _window$peer2.disconnect();
 };
 
 stage.lockInit = async function () {
@@ -19830,6 +19828,7 @@ stage.lockInit = async function () {
   emit(`promptList,${escape(JSON.stringify(gp))}`); // sends prompts and triggers first round of answer gathering
 
   stage.roundprompts(); // starts roundprompt loop and the timer on host
+  // window.peer?.disconnect()
 };
 
 const sleep = m => new Promise(r => setTimeout(r, m));
@@ -20453,7 +20452,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64402" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53586" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
