@@ -264,8 +264,8 @@ if (url.hash === "#host" || navigator.userAgent.includes("Electron")){ // HOST
   peer.on('connection', function(conn) {
     // if any users disconnect after game start, reconnect to server
     conn.on('close', function(){
-      console.log('closed what', conn)
-      if (window.phase !== "lobby" && !peer.disconnected){ ///FIXEEE
+      console.log('closed what', conn, peer.disconnected, window.phase)
+      if (window.phase !== "lobby" && peer.disconnected){ ///FIXEEE
         console.log('closed', conn)
       
         peer._lastServerId = peerID_reconnect
@@ -295,13 +295,15 @@ if (url.hash === "#host" || navigator.userAgent.includes("Electron")){ // HOST
       console.log("host open", conn, conn.peer,conn2);
       
       conn.peerConnection.onconnectionstatechange = function(event) {
-        if (window.phase !== "lobby" && !peer.disconnected){
-          console.log('closed', conn)
+        console.log('closed what 2', conn)
+        if (window.phase !== "lobby" && peer.disconnected){
+          console.log('closed if2', conn)
         
           peer._lastServerId = peerID_reconnect
           peer.reconnect();
         }else
         if (window.phase === "lobby" && conn.peerConnection.connectionState === "failed"){
+          console.log('closed else2', conn)
           var playerIndex = players.indexOf(conn.metadata)
           if (playerIndex !== -1) players.splice(playerIndex, 1);
           window.stage.lobby();
@@ -518,7 +520,7 @@ stage.lockInit = async function() {
       aud.pause()
     emit(`promptList,${escape(JSON.stringify(gp))}`); // sends prompts and triggers first round of answer gathering
     stage.roundprompts(); // starts roundprompt loop and the timer on host
-    // window.peer?.disconnect()
+    window.peer?.disconnect()
 }
 
 const sleep = m => new Promise(r => setTimeout(r, m))
