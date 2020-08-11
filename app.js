@@ -12,6 +12,7 @@ var app = express();
 const server = http.createServer(app);
 
 app.use(express.static('build'))
+app.use(express.static('data'))
 
 const PORT = process.env.PORT || (process.env.ENV == "prod" ? 80 : 3002);
 
