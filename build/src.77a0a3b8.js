@@ -19506,11 +19506,13 @@ window._ = _; // const remote = require('electron').remote
 window.onfocus = function () {
   console.log("hey oh");
 
-  for (let [key, conn] of Object.entries(peer.connections)) {
-    if (conn.some(arr => arr.peerConnection.connectionState === "connected")) {
-      console.log('hi');
-    } else {
-      client(peer, "reconnect");
+  if (window.peer) {
+    for (let [key, conn] of Object.entries(peer.connections)) {
+      if (conn.some(arr => arr.peerConnection.connectionState === "connected")) {
+        console.log('hi');
+      } else {
+        client(peer, "reconnect");
+      }
     }
   } //   // confirm p2p connection then return
   //   // connect to negotiating server
@@ -20451,7 +20453,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60232" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64402" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
