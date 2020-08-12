@@ -9,8 +9,9 @@
 // leaving during lobby phase doesn't remove player from players array
 // you can submit prompt when not connected
 
-window.que = Date.now();
+window.que = Date.now() - 3000;
 function checkConnected(counter = 0, timer = Date.now()){
+  $("#vis").prepend("<div>check connect</div>");
   counter++
   console.log("check", "que", que, "timer", timer,  timer - que)
   if (timer - que >= 2000) {que = Date.now()}else{return "wait"}
@@ -19,6 +20,7 @@ function checkConnected(counter = 0, timer = Date.now()){
       if (conn.some(arr => arr.peerConnection.connectionState === "connected")){
         console.log('hi'); return "connected";
         }else{
+          $("#vis").prepend("</div>reconnect</div>");
           client(peer, "reconnect", window.name, window.host)
       }
     }
@@ -249,6 +251,7 @@ window._ = _;
 
 var url = new URL(window.location.href);
 if (url.hash !== "#host" && !navigator.userAgent.includes("Electron")){ // HOST
+  checkConnected();
   $(document).ready(function() {
     var hidden, visibilityState, visibilityChange;
 

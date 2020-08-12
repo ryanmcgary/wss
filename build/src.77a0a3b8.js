@@ -19283,9 +19283,10 @@ var define;
 // problems 
 // leaving during lobby phase doesn't remove player from players array
 // you can submit prompt when not connected
-window.que = Date.now();
+window.que = Date.now() - 3000;
 
 function checkConnected(counter = 0, timer = Date.now()) {
+  $("#vis").prepend("<div>check connect</div>");
   counter++;
   console.log("check", "que", que, "timer", timer, timer - que);
 
@@ -19301,6 +19302,7 @@ function checkConnected(counter = 0, timer = Date.now()) {
         console.log('hi');
         return "connected";
       } else {
+        $("#vis").prepend("</div>reconnect</div>");
         client(peer, "reconnect", window.name, window.host);
       }
     }
@@ -19542,6 +19544,7 @@ var url = new URL(window.location.href);
 
 if (url.hash !== "#host" && !navigator.userAgent.includes("Electron")) {
   // HOST
+  checkConnected();
   $(document).ready(function () {
     var hidden, visibilityState, visibilityChange;
 
@@ -20506,7 +20509,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55728" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53590" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
