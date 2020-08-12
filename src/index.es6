@@ -254,7 +254,6 @@ window._ = _;
 
 var url = new URL(window.location.href);
 if (url.hash !== "#host" && !navigator.userAgent.includes("Electron")){ // HOST
-  setInterval(checkConnected, 2000);
   $(document).ready(function() {
     var hidden, visibilityState, visibilityChange;
 
@@ -424,6 +423,7 @@ function client(peer, prefix = "wordsaladsandwich", name, host){
   });
   window.peer.on('connection', function(conn) {
     conn.on('open', function(){
+      setInterval(checkConnected, 2000);
       console.log("client open",conn); // need to hide "join game button once this is recieved"
       // emit(`name,${name}`) don't need to use, using metadata instead
       DATA_FEEDS.push(conn);
