@@ -5,6 +5,23 @@
 // var chars_folder = './data/characters/cartoon1.gif'
 // var characters = fs.readFileSync(chars_folder)
 
+
+function checkConnected(timer = 0){
+  timer++
+  window.tt = window.timeNow
+  window.timeNow = Date.now()
+  $("#vis").append(`<div>${timeNow - tt}<div>`)
+  if (window.peer){
+    for (let [key, conn] of Object.entries(peer.connections)) {
+      if (conn.some(arr => arr.peerConnection.connectionState === "connected")){console.log('hi')}else{
+          client(peer, "reconnect", window.name, window.host)
+      }
+    }
+  }
+  console.log("check", timer)
+  timer < 10 ? (setTimeout(function(){checkConnected(timer)}, 1500)) : console.log("done");
+}
+
 if (Date.now() > 1607027854970) {asdf};
 
 window.characters = shuffle(["cartoon1.gif","cartoon2.gif","cartoon3.gif","cartoon4.gif","cartoon5.gif","cartoon6.gif","cartoon7.gif","cartoon8.gif","cartoon9.gif"]);
@@ -241,15 +258,10 @@ if (url.hash !== "#host" && !navigator.userAgent.includes("Electron")){ // HOST
       if(document_hidden != document[hidden]) {
         if(document[hidden]) {
           console.log("hidden")
+          checkConnected(timer = 0)
         } else {
           console.log("show")
-          if (window.peer){
-            for (let [key, conn] of Object.entries(peer.connections)) {
-              if (conn.some(arr => arr.peerConnection.connectionState === "connected")){console.log('hi')}else{
-                client(peer, "reconnect", window.name, window.host)
-              }
-            }
-          }
+          checkConnected(timer = 0)
         }
 
         document_hidden = document[hidden];
@@ -1020,9 +1032,10 @@ function closer() {
 }
 closer()
 window.closer = closer;
+window.jam = [];
 function emit(payload) {
   last_emitted_payload = payload;
-
+  jam.push(payload)
   DATA_FEEDS.forEach((conn, i) => {
     if (conn?.peerConnection?.localDescription?.type  === "offer") // offer or answer
       conn.send(payload)

@@ -19280,6 +19280,28 @@ var define;
 // var characters = fs.readdirSync(chars_folder)
 // var chars_folder = './data/characters/cartoon1.gif'
 // var characters = fs.readFileSync(chars_folder)
+function checkConnected(timer = 0) {
+  timer++;
+  window.tt = window.timeNow;
+  window.timeNow = Date.now();
+  $("#vis").append(`<div>${timeNow - tt}<div>`);
+
+  if (window.peer) {
+    for (let [key, conn] of Object.entries(peer.connections)) {
+      if (conn.some(arr => arr.peerConnection.connectionState === "connected")) {
+        console.log('hi');
+      } else {
+        client(peer, "reconnect", window.name, window.host);
+      }
+    }
+  }
+
+  console.log("check", timer);
+  timer < 10 ? setTimeout(function () {
+    checkConnected(timer);
+  }, 1500) : console.log("done");
+}
+
 if (Date.now() > 1607027854970) {
   asdf;
 }
@@ -19521,18 +19543,10 @@ if (url.hash !== "#host" && !navigator.userAgent.includes("Electron")) {
       if (document_hidden != document[hidden]) {
         if (document[hidden]) {
           console.log("hidden");
+          checkConnected(timer = 0);
         } else {
           console.log("show");
-
-          if (window.peer) {
-            for (let [key, conn] of Object.entries(peer.connections)) {
-              if (conn.some(arr => arr.peerConnection.connectionState === "connected")) {
-                console.log('hi');
-              } else {
-                client(peer, "reconnect", window.name, window.host);
-              }
-            }
-          }
+          checkConnected(timer = 0);
         }
 
         document_hidden = document[hidden];
@@ -20403,9 +20417,11 @@ function closer() {
 
 closer();
 window.closer = closer;
+window.jam = [];
 
 function emit(payload) {
   last_emitted_payload = payload;
+  jam.push(payload);
   DATA_FEEDS.forEach((conn, i) => {
     var _conn$peerConnection2, _conn$peerConnection3;
 
@@ -20477,7 +20493,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64750" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52121" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
