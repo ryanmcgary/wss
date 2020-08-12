@@ -13,7 +13,7 @@ window.que = Date.now();
 function checkConnected(counter = 0, timer = Date.now()){
   counter++
   console.log("check", "que", que, "timer", timer,  timer - que)
-  if (timer - que >= 1500) {que = Date.now()}else{return "wait"}
+  if (timer - que >= 2000) {que = Date.now()}else{return "wait"}
   if (window.peer){
     for (let [key, conn] of Object.entries(peer.connections)) {
       if (conn.some(arr => arr.peerConnection.connectionState === "connected")){
@@ -23,7 +23,7 @@ function checkConnected(counter = 0, timer = Date.now()){
       }
     }
   }
-  counter < 10 ? (setTimeout(function(){checkConnected(counter)}, 2000)) : console.log("done");
+  setTimeout(function(){checkConnected(counter)}, 2000);
 }
 
 window.onblur = function(){checkConnected()}

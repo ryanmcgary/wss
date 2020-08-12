@@ -19289,7 +19289,7 @@ function checkConnected(counter = 0, timer = Date.now()) {
   counter++;
   console.log("check", "que", que, "timer", timer, timer - que);
 
-  if (timer - que >= 1500) {
+  if (timer - que >= 2000) {
     que = Date.now();
   } else {
     return "wait";
@@ -19306,9 +19306,9 @@ function checkConnected(counter = 0, timer = Date.now()) {
     }
   }
 
-  counter < 10 ? setTimeout(function () {
+  setTimeout(function () {
     checkConnected(counter);
-  }, 2000) : console.log("done");
+  }, 2000);
 }
 
 window.onblur = function () {
