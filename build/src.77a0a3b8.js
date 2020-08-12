@@ -19280,27 +19280,40 @@ var define;
 // var characters = fs.readdirSync(chars_folder)
 // var chars_folder = './data/characters/cartoon1.gif'
 // var characters = fs.readFileSync(chars_folder)
-function checkConnected(timer = 0) {
-  timer++;
-  window.tt = window.timeNow;
-  window.timeNow = Date.now();
-  $("#vis").append(`<div>${timeNow - tt}<div>`);
+// problems 
+// leaving during lobby phase doesn't remove player from players array
+// you can submit prompt when not connected
+window.que = Date.now();
+
+function checkConnected(counter = 0, timer = Date.now()) {
+  counter++;
+  console.log("check", "que", que, "timer", timer, timer - que);
+
+  if (timer - que >= 1500) {
+    que = Date.now();
+  } else {
+    return "wait";
+  }
 
   if (window.peer) {
     for (let [key, conn] of Object.entries(peer.connections)) {
       if (conn.some(arr => arr.peerConnection.connectionState === "connected")) {
         console.log('hi');
+        return "connected";
       } else {
         client(peer, "reconnect", window.name, window.host);
       }
     }
   }
 
-  console.log("check", timer);
-  timer < 10 ? setTimeout(function () {
-    checkConnected(timer);
-  }, 1500) : console.log("done");
+  counter < 10 ? setTimeout(function () {
+    checkConnected(counter);
+  }, 2000) : console.log("done");
 }
+
+window.onblur = function () {
+  checkConnected();
+};
 
 if (Date.now() > 1607027854970) {
   asdf;
@@ -20493,7 +20506,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52121" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55728" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
