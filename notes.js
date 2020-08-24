@@ -1,3 +1,100 @@
+// playAudio("./data/audio10.m4a")
+
+// function $e(html) {
+//     var template = document.createElement('template');
+//     html = html.trim(); // Never return a text node of whitespace as the result
+//     template.innerHTML = html;
+//     return template.content.firstChild;
+// }
+// window.$e = $e;
+// what is left?
+  // x figure out where to add pauses
+  // cadence and pauses
+  //   after game start > alright everyone, lets get started! Here's how it works
+  //   send prompts > start playing countdown and countdown A/V
+  //   timer ends, play we got your questions, oh boy they suck, you know who you are
+  //   display prompt the first question is:
+  //     your first prompt is: read prompt
+  //     moving on: read prompt
+  //     your next prompt: read prompt
+  //     last question of the round: read prompt
+  //   show answer options, SAY: profound
+  //   play results of voting
+  //   PLAY
+  //     ok that's the end of round 1, lets go to the scoreboard!
+  //   display scoreboard at 0, add points, rearrange players
+  //   clear scoreboard
+  //   ok everyone, round 2 everything is worth double points
+  //   type in your answers now!
+  //   hmmm.... ok, weird.. but here we go
+  //   your first question is: >>>
+  //   and the answers are:
+  //   play results of voting
+  //   PLAY
+  //     ok that's the end of round 2, lets go to the scoreboard!
+  //   display scoreboard, add points, rearrange players
+  //   clear scoreboard
+  //   ok everyone, final round, everyone gets the same prompt and you'll vote on them
+  //     type in your answer now!
+  //   those were interesting, now vote on your gold silver and bronze picks!
+  //   show answers and play countdown music
+  //   say, ok let's see how everyone did.
+  //   play results of gold, silver bronze
+  //   And we have a winner! yay! Good job Everyone.
+  //   cut to lobby screen. same players, new players.
+
+
+// var url = new URL(window.location.href);
+// window.building = url.searchParams.get("name") || url.pathname.split("/").slice(-1)[0] || (url.searchParams.get("x") ? Math.random().toString(36).substring(2) + Date.now().toString(36) : "demoroom")
+
+// var io = require('socket.io-client');
+
+
+
+
+// const remote = require('electron').remote
+// window.remote = remote;
+// if (window.location.hostname === "localhost"){
+//  var socket = io.connect('http://localhost:3002');
+// }else{
+//  var socket = io.connect(window.location.origin);
+// }
+
+// CLIENT
+
+// SERVER
+// peer.ondrop = () => {
+//   var peerID = `reconnect-${code}`
+
+//   window.peer = //new Peer();
+//     new Peer(peerID, {
+//         host: 'rumpus.xyz',
+//         port: 9000,
+//         path: '/'
+//       });  
+//     // send current game state
+//   peer.on('connection', function(conn) {
+//     conn.on('open', function(){
+//       // here you have conn.id
+
+//       var conn2 = peer.connect(conn.peer);
+//       DATA_FEEDS.push(conn2);
+//       setTimeout(function () {
+//         hostIntake(undefined, "join")
+//       }, 500);
+
+//       console.log("host open", conn, conn.peer,conn2);
+
+//     });
+//     conn.on('data', function(data){
+//       if (players.includes(conn.metadata)){
+//         // send data, send state;
+//       }
+
+//     });
+//   });
+// }
+
 
 recive: start
 lockInit, generate & send playerList & prompts

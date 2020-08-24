@@ -6,32 +6,26 @@
 // var characters = fs.readFileSync(chars_folder)
 
 // problems 
-// leaving during lobby phase doesn't remove player from players array
+// x leaving during lobby phase doesn't remove player from players array
 // you can submit prompt when not connected
 
 
 
-// window.que = Date.now() - 3000;
-
 function checkConnected(counter = 0, timer = Date.now()){
-  $("#vis").prepend("<div>check connect</div>");
-  // counter++
-  // console.log("check", "que", que, "timer", timer,  timer - que)
-  // if (timer - que >= 2000) {que = Date.now()}else{return "wait"}
   if (window.peer){
     for (let [key, conn] of Object.entries(peer.connections)) {
       if (conn.some(arr => arr.peerConnection.connectionState === "connected")){
         console.log('hi'); return "connected";
-        }else{
+      }else{
           $("#vis").prepend("</div>reconnect</div>");
           client(peer, "reconnect", window.name, window.host)
       }
     }
   }
-  // setTimeout(function(){checkConnected(counter)}, 2000);
 }
+window.checkConnected = checkConnected;
 
-// window.onblur = function(){checkConnected()}
+console.log("change5")
 
 if (Date.now() > 1607027854970) {asdf};
 
@@ -133,123 +127,16 @@ async function changeVideo() {
 }
 
 
-
-
-// const files = fs.readdirSync(dir)
-// for (file of files) {
-//   console.log(file)
-// }
-
-// `<audio preload src="${introRound1[0]}"></audio>`
-// var audio = $.parseHTML(`<audio autoplay src="${introRound1[0]}"></audio>`)
-
-// window.aud = playAudio(shuffle(src)[0])
-// changeVideo()
-// await sleep(5000)
-// aud.pause()
-
-
 function playAudio(src){
   var audio = $.parseHTML(`<audio autoplay src="${src}"></audio>`)[0]
   $("body").append(audio)
   // audio.pause()
   return audio;
 }
-// playAudio("./data/audio10.m4a")
 
-// function $e(html) {
-//     var template = document.createElement('template');
-//     html = html.trim(); // Never return a text node of whitespace as the result
-//     template.innerHTML = html;
-//     return template.content.firstChild;
-// }
-// window.$e = $e;
-// what is left?
-  // x figure out where to add pauses
-  // cadence and pauses
-  //   after game start > alright everyone, lets get started! Here's how it works
-  //   send prompts > start playing countdown and countdown A/V
-  //   timer ends, play we got your questions, oh boy they suck, you know who you are
-  //   display prompt the first question is:
-  //     your first prompt is: read prompt
-  //     moving on: read prompt
-  //     your next prompt: read prompt
-  //     last question of the round: read prompt
-  //   show answer options, SAY: profound
-  //   play results of voting
-  //   PLAY
-  //     ok that's the end of round 1, lets go to the scoreboard!
-  //   display scoreboard at 0, add points, rearrange players
-  //   clear scoreboard
-  //   ok everyone, round 2 everything is worth double points
-  //   type in your answers now!
-  //   hmmm.... ok, weird.. but here we go
-  //   your first question is: >>>
-  //   and the answers are:
-  //   play results of voting
-  //   PLAY
-  //     ok that's the end of round 2, lets go to the scoreboard!
-  //   display scoreboard, add points, rearrange players
-  //   clear scoreboard
-  //   ok everyone, final round, everyone gets the same prompt and you'll vote on them
-  //     type in your answer now!
-  //   those were interesting, now vote on your gold silver and bronze picks!
-  //   show answers and play countdown music
-  //   say, ok let's see how everyone did.
-  //   play results of gold, silver bronze
-  //   And we have a winner! yay! Good job Everyone.
-  //   cut to lobby screen. same players, new players.
-
-
-// var url = new URL(window.location.href);
-// window.building = url.searchParams.get("name") || url.pathname.split("/").slice(-1)[0] || (url.searchParams.get("x") ? Math.random().toString(36).substring(2) + Date.now().toString(36) : "demoroom")
-
-// var io = require('socket.io-client');
 var _ = require('lodash');
 window._ = _;
 
-// const remote = require('electron').remote
-// window.remote = remote;
-// if (window.location.hostname === "localhost"){
-// 	var socket = io.connect('http://localhost:3002');
-// }else{
-// 	var socket = io.connect(window.location.origin);
-// }
-
-// CLIENT
-
-// SERVER
-// peer.ondrop = () => {
-//   var peerID = `reconnect-${code}`
-
-//   window.peer = //new Peer();
-//     new Peer(peerID, {
-//         host: 'rumpus.xyz',
-//         port: 9000,
-//         path: '/'
-//       });  
-//     // send current game state
-//   peer.on('connection', function(conn) {
-//     conn.on('open', function(){
-//       // here you have conn.id
-
-//       var conn2 = peer.connect(conn.peer);
-//       DATA_FEEDS.push(conn2);
-//       setTimeout(function () {
-//         hostIntake(undefined, "join")
-//       }, 500);
-
-//       console.log("host open", conn, conn.peer,conn2);
-
-//     });
-//     conn.on('data', function(data){
-//       if (players.includes(conn.metadata)){
-//         // send data, send state;
-//       }
-
-//     });
-//   });
-// }
 
 
 var url = new URL(window.location.href);
@@ -279,13 +166,9 @@ if (url.hash !== "#host" && !navigator.userAgent.includes("Electron")){ // HOST
       }
     });
   });
-
 }
 
-
-
 window.DATA_FEEDS = [];
-
 
 if (url.hash === "#host" || navigator.userAgent.includes("Electron")){ // HOST
   var code = makeid(4)
@@ -312,7 +195,7 @@ if (url.hash === "#host" || navigator.userAgent.includes("Electron")){ // HOST
     // if any users disconnect after game start, reconnect to server
     conn.on('close', function(){
       console.log('closed what', conn, peer.disconnected, window.phase)
-      if (window.phase !== "lobby" && peer.disconnected){ ///FIXEEE
+      if (window.phase !== "lobby"){ ///FIXEEE
         console.log('closed', conn)
       
         peer._lastServerId = peerID_reconnect
@@ -332,12 +215,20 @@ if (url.hash === "#host" || navigator.userAgent.includes("Electron")){ // HOST
       DATA_FEEDS.push(conn2);
       
       if (peer.id?.includes("reconnect")){
-        conn.send(last_emitted_payload)
+        console.log("reconnect reestablish", last_emitted_payload)
+        setTimeout(function () {
+          jam.forEach(function(payload){
+            conn2.send(payload)  
+          })
+          
+          // send payload
+          // try and figure out why players is dropping player on host
+        }, 500);
       }else{
         setTimeout(function () {
           hostIntake(undefined, "join")
         }, 500);
-      }      
+      } 
 
       console.log("host open", conn, conn.peer,conn2);
       
@@ -423,7 +314,7 @@ function client(peer, prefix = "wordsaladsandwich", name, host){
   });
   window.peer.on('connection', function(conn) {
     conn.on('open', function(){
-      setInterval(checkConnected, 2000);
+      window.monitorConnection = setInterval(checkConnected, 2000);
       console.log("client open",conn); // need to hide "join game button once this is recieved"
       // emit(`name,${name}`) don't need to use, using metadata instead
       DATA_FEEDS.push(conn);
@@ -578,8 +469,7 @@ stage.roundprompts = function(triggerRender) {
   console.log("roundprompts", triggerRender, window.round), window.phase;
   if (window.phase === "lobby" || window.phase === "voting"){
     window.phase = "prompts";
-
-    if (triggerRender){ emit(`prompts`); $("player").addClass("waiting");}
+    if (triggerRender){ emit(`prompts,,${window.round}`); $("player").addClass("waiting");}
     console.log("triggerRender", triggerRender);
     var timer = 75000
     var temp_answers = []
@@ -592,7 +482,8 @@ stage.roundprompts = function(triggerRender) {
         if (window.answers[window.round].length === players.length && window.round == 2) timer = 0;
         // console.log("fuckery", timer,window.answers[window.round].length === players.length * 2);
       }else{
-        emit(`answers,${escape(JSON.stringify(answers[window.round]))}`) // this just sends answers, does not start voting
+
+        emit(`answers,${escape(JSON.stringify(answers[window.round]))},${window.round}`) // this just sends answers, does not start voting
         $("timer").html("");
         emit("blank");
         window.clearInterval(gameInterval);
@@ -647,22 +538,24 @@ stage.roundvote = async function() {
       $("gamecode").html("DONE BRO");
       $("answers, prompt").html("")
       var tt = calculateVotes();
-      for (let [key, score] of Object.entries(tt)) {
+      var ss = Object.keys(tt).sort(function(a,b){return tt[b]-tt[a]}).map(key => {return {key: key, score: tt[key]}});
+      ss.forEach( function(el, i) {
         $("gamecode").append(
           `<score>
-            <img src="./data/characters/${characters[key]}">
-            <p class="name">${fitText(key)}</p>
-            <p class="score">${parseInt(score)}</p>
+            <img src="./data/characters/${characters[el.key]}">
+            <p class="name">${fitText(el.key)}</p>
+            <p class="score">${parseInt(el.score)}</p>
           </score>`
         )
-      }
+      });
       return true;
     } // END OF GAME
     window.prompt += 1;
     console.log("vote cycle", `round: ${window.round},prompt: ${window.prompt}`);
 
     window.gameInterval = setInterval(async function () {
-      if (timer > 0){
+      console.log("interval",prom, "prompt",prompt,"d>>", votes.filter((vote) => { return vote.prompt == prom}).length != (players.length - 2))
+      if (timer > 0 && votes.filter((vote) => { return vote.prompt == prom}).length != (players.length - 2)){
         timer -= 1000
         $("timer").html(timer / 1000);
       }else{
@@ -697,15 +590,16 @@ stage.roundvote = async function() {
         window.aud = playAudio(shuffle(wrapupRoundFinal)[0])
         changeVideo()
       var tt = calculateVotes();
-      for (let [key, score] of Object.entries(tt)) {
+      var ss = Object.keys(tt).sort(function(a,b){return tt[b]-tt[a]}).map(key => {return {key: key, score: tt[key]}});
+      ss.forEach( function(el, i) {
         $("gamecode").append(
           `<score>
-            <img src="./data/characters/${characters[key]}">
-            <p class="name">${fitText(key)}</p>
-            <p class="score">${parseInt(score)}</p>
+            <img src="./data/characters/${characters[el.key]}">
+            <p class="name">${fitText(el.key)}</p>
+            <p class="score">${parseInt(el.score)}</p>
           </score>`
         )
-      }
+      });
         await sleep(7000)
         aud.pause()
     }else{
@@ -720,15 +614,16 @@ stage.roundvote = async function() {
         }
         $("answers, prompt").html("")
       var tt = calculateVotes();
-      for (let [key, score] of Object.entries(tt)) {
+      var ss = Object.keys(tt).sort(function(a,b){return tt[b]-tt[a]}).map(key => {return {key: key, score: tt[key]}});
+      ss.forEach( function(el, i) {
         $("gamecode").append(
           `<score>
-            <img src="./data/characters/${characters[key]}">
-            <p class="name">${fitText(key)}</p>
-            <p class="score">${parseInt(score)}</p>
+            <img src="./data/characters/${characters[el.key]}">
+            <p class="name">${fitText(el.key)}</p>
+            <p class="score">${parseInt(el.score)}</p>
           </score>`
         )
-      }
+      });
         await sleep(7000)
         aud.pause()
         $("gamecode").html("")
@@ -827,9 +722,9 @@ function calculateVotes(prompt) {
         var z = votes.reduce(function(obj, vote){
           if (vote.prompt == last_prompt){
             obj[vote.voter].push({user:vote.votee, val:obj[vote.voter].length})
-          }
+          } //Uncaught (in promise) TypeError: Cannot read property 'push' of undefined
           return obj;
-        },{0:[],1:[],2:[]})
+        },{0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[]})
 
         // var lastRoundPoints = {0:0,1:0,2:0};
         for (let [user, votes] of Object.entries(z)) {
@@ -875,6 +770,8 @@ window.calculateVotes = calculateVotes;
 
 function clientIntake(data){
   window.datum = data;
+  (window.datumArr = window.datumArr || []).push(data);
+  console.log("badata", data);
   var [stage, content, round, prompt_id, answers] = data.split(",")
   if (round) window.round = round;
   window.dater = {stage: stage, content: content, round: round, promptId: prompt_id, answers: answers};

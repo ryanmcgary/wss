@@ -1,4 +1,5 @@
 const electron = require("electron");
+const { protocol } = require('electron')
 const app = electron.app;
 
 const BrowserWindow = electron.BrowserWindow;
@@ -25,9 +26,7 @@ function createWindow() {
       : `file://${path.join(__dirname, "./build/index.html")}`
   );
 
-  mainWindow.webContents.on('did-finish-load', function() {
-
-  });
+  mainWindow.webContents.on('did-finish-load', function() {});
 
   // var menu = Menu.buildFromTemplate([
   //     {

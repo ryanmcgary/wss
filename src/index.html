@@ -12,7 +12,7 @@
       font-size: 36px;
     }
     score img{
-      width: 62px;
+      max-height: 100px;
     }
     score p.name{height: 69px;}
     score p{
@@ -161,7 +161,7 @@
   <script src="https://code.jquery.com/jquery-3.0.0.min.js" charset="utf-8"></script>
   <script src="https://cdn.jsdelivr.net/npm/peerjs@1.3.0/dist/peerjs.min.js"></script>
 
-  <script defer src="index.es6" charset="utf-8"></script>
+  <script defer src="./index.es6" charset="utf-8" class="internal"></script>
 </head>
 <body>
   <video src="" class="bg" loop="true" autoplay=""></video>
@@ -204,7 +204,11 @@
      //     return "Are you sure?";
      // }
     }
-
+    $(document).ready(function(){
+      $(".internal").each(function(i,e){
+        $.getScript($(e).attr("src").slice(1));
+      })
+    })
 
 
   </script>
