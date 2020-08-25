@@ -19851,23 +19851,6 @@ stage.roundvote = async function () {
   if (window.prompt % players.length || !(window.prompt % players.length) && window.phase !== "voting") {
     var _player_prompts$filte;
 
-    // STEP:4 Start voting
-    console.log("voteStart");
-    var prompt_text = (_player_prompts$filte = player_prompts.filter(p => p.id == window.prompt)[0]) === null || _player_prompts$filte === void 0 ? void 0 : _player_prompts$filte.p;
-    var answees = answers.all.filter(ans => ans.prompt_id == window.prompt).map(answer => `<answer player="${answer.player_id}"><p>${answer.answer}</p></answer>`);
-    $("prompt").text(prompt_text);
-    $("answers").html("");
-    window.aud = playAudio(shuffle(voteStart)[0]);
-    changeVideo();
-    await sleep(5000);
-    $("answers").html(answees);
-    aud.pause();
-    var prom = window.prompt;
-    window.phase = "voting";
-    var timer = 17000;
-    if (window.round == 2) timer = 19000;
-    emit(`vote,,${window.round},${window.prompt}`);
-
     if (window.prompt > players.length + players.length) {
       // if prompt is greater than twice number of players then it's the last item
       $("gamecode").html("DONE BRO");
@@ -19889,9 +19872,25 @@ stage.roundvote = async function () {
           </score>`);
       });
       return true;
-    } // END OF GAME
+    } // END OF GAME    
+    // STEP:4 Start voting
 
 
+    console.log("voteStart");
+    var prompt_text = (_player_prompts$filte = player_prompts.filter(p => p.id == window.prompt)[0]) === null || _player_prompts$filte === void 0 ? void 0 : _player_prompts$filte.p;
+    var answees = answers.all.filter(ans => ans.prompt_id == window.prompt).map(answer => `<answer player="${answer.player_id}"><p>${answer.answer}</p></answer>`);
+    $("prompt").text(prompt_text);
+    $("answers").html("");
+    window.aud = playAudio(shuffle(voteStart)[0]);
+    changeVideo();
+    await sleep(5000);
+    $("answers").html(answees);
+    aud.pause();
+    var prom = window.prompt;
+    window.phase = "voting";
+    var timer = 17000;
+    if (window.round == 2) timer = 19000;
+    emit(`vote,,${window.round},${window.prompt}`);
     window.prompt += 1;
     console.log("vote cycle", `round: ${window.round},prompt: ${window.prompt}`);
     window.gameInterval = setInterval(async function () {
@@ -19899,9 +19898,9 @@ stage.roundvote = async function () {
         return vote.prompt == prom;
       }).length != players.length - 2);
 
-      if (timer > 0 && votes.filter(vote => {
+      if (timer > 0 && (votes.filter(vote => {
         return vote.prompt == prom;
-      }).length != players.length - 2) {
+      }).length != players.length - 2 || window.round == 2)) {
         timer -= 1000;
         $("timer").html(timer / 1000);
       } else {
@@ -20276,7 +20275,7 @@ function clientIntake(data) {
       if (round == 2) {
         prompt_ui = prompt_answer.map(pa => {
           if (window.n != pa.player_id) {
-            return `<button onclick="emit('vote,${n},${pa.player_id},${pa.round_id},${pa.prompt_id}');this.remove();nextStage('Nice Vote! ')">${pa.answer}</button>`;
+            return `<button onclick="emit('vote,${n},${pa.player_id},${pa.round_id},${pa.prompt_id}');this.remove();">${pa.answer}</button>`; // TODO: remove buttons after 3 clicks
           }
         }).filter(item => !!item).join("");
       }
