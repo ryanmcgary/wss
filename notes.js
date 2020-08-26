@@ -1,3 +1,16 @@
+todo:
+x make add a prompt section hide or go away on game start
+x make enter submit on text area for joining a game
+x make 1 2 3 positions larger or gold silver bronze color or give a medal
+x make votes clear as gold silver bronze
+show points being added after each vote
+play with distorted audio
+play with recording question files
+send stuff to collin
+
+
+
+
 // playAudio("./data/audio10.m4a")
 
 // function $e(html) {

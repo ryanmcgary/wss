@@ -19872,7 +19872,7 @@ stage.roundvote = async function () {
           </score>`);
       });
       return true;
-    } // END OF GAME    
+    } // END OF GAME
     // STEP:4 Start voting
 
 

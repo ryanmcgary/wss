@@ -533,7 +533,8 @@ stage.roundvote = async function() {
         )
       });
       return true;
-    } // END OF GAME    
+    } // END OF GAME
+        
     // STEP:4 Start voting
       console.log("voteStart");
       var prompt_text = player_prompts.filter(p => p.id == window.prompt)[0]?.p
