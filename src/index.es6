@@ -15,9 +15,16 @@ function checkConnected(counter = 0, timer = Date.now()){
   if (window.peer){
     for (let [key, conn] of Object.entries(peer.connections)) {
       if (conn.some(arr => arr.peerConnection.connectionState === "connected")){
-        console.log('hi'); return "connected";
+        console.log('hi'); 
+        if ($("#vis").text().includes("reconnecting")){
+          $("#vis").html("</div>connected!</div>");  
+        }else{
+          $("#vis").html("");  
+        }
+        return "connected";
       }else{
-          $("#vis").prepend("</div>reconnect</div>");
+          $("#vis").html("</div>reconnecting</div><div id='loading'></div>");
+          // MODAL Disconnected from Game, Trying to Reconnect
           client(peer, "reconnect", window.name, window.host)
       }
     }
@@ -27,7 +34,7 @@ window.checkConnected = checkConnected;
 
 console.log("change5")
 
-if (Date.now() > 1607027854970) {asdf};
+// if (Date.now() > 1607027854970) {asdf};
 
 window.characters = shuffle(["cartoon1.gif","cartoon2.gif","cartoon3.gif","cartoon4.gif","cartoon5.gif","cartoon6.gif","cartoon7.gif","cartoon8.gif","cartoon9.gif"]);
 window.videos = ['city.mp4','clouds.mp4','jelly.mp4','lava.mp4','liquidvisual.mp4','rainbow.mp4','turntable.mp4','water.mp4','woods.mp4','zigzag.mp4'];
@@ -89,10 +96,11 @@ function again() {
   emit("blank");
   window.clearInterval(gameInterval);
   initHost();
-  stage.lockInit();
   $("answers, prompt").html("")
   $("timer").html("");
+  stage.lockInit();
 }
+
 window.again = again;
 function restart() {
   var txt;
@@ -186,7 +194,7 @@ if (url.hash === "#host" || navigator.userAgent.includes("Electron")){ // HOST
   peer.on("open", function(id) {
     console.log("established" ,id)
     if (id === peerID)
-      $("gamecode").html(`<h2>${code}</h2>`)
+      $("gamecode").html(`<h4 style="margin-block-start: 0px;margin-block-end: 0px;">Join the game at <span style="color: #4242ff;">rumpus.xyz</span> using your browser and game code:</h4><h2>${code}</h2>`)
   });
   peer.on('error', function(err) {
       console.log("Error: ", err);
@@ -227,7 +235,7 @@ if (url.hash === "#host" || navigator.userAgent.includes("Electron")){ // HOST
       }else{
         setTimeout(function () {
           hostIntake(undefined, "join")
-        }, 500);
+        }, 5000);
       } 
 
       console.log("host open", conn, conn.peer,conn2);
@@ -308,6 +316,15 @@ function client(peer, prefix = "wordsaladsandwich", name, host){
       path: '/'
     });// have to initialize this every time because library won't let you delete hanged connectoin attempts
   // peer = window.peer
+  
+
+  if (localStorage.getItem("code")) var [timeStamp, code] = localStorage.getItem("code").split(","); // `${timeStamp},${code}`
+
+  if (host === code && Date.now() - timeStamp < 1200000) { // 
+    hostID = `reconnect-${host}`
+    name = (localStorage.getItem("name") || name)
+  }
+
   window.peer.on("open", function(id) {
     var host = window.peer.connect(hostID, {metadata: name});
     DATA_FEEDS.push(host);
@@ -315,6 +332,7 @@ function client(peer, prefix = "wordsaladsandwich", name, host){
   window.peer.on('connection', function(conn) {
     conn.on('open', function(){
       window.monitorConnection = setInterval(checkConnected, 2000);
+      localStorage.removeItem("code");
       console.log("client open",conn); // need to hide "join game button once this is recieved"
       // emit(`name,${name}`) don't need to use, using metadata instead
       DATA_FEEDS.push(conn);
@@ -371,6 +389,9 @@ stage.join = function() {
     stage.lobby();
 }
 stage.start = function() {
+    emit("blank");
+    if (window.gameInterval) window.clearInterval(gameInterval);
+    initHost();
     stage.lockInit();
 }
 stage.answer = function(phase, player_id, round_id, prompt_id, content) {
@@ -415,6 +436,7 @@ stage.lobby = function() {
   emit(`lobby,${escape(players.toString())}`)
 }
 stage.lockInit = async function() {
+    initHost();
   // players
     var clientArray = _.reduce(peer.connections, (arr, conns)=>{
       var meta = _.reduce(conns, (arr, conn)=>{
@@ -549,7 +571,7 @@ stage.roundvote = async function() {
     var prom = window.prompt;
     window.phase = "voting";
     var timer = 17000
-    if (window.round == 2) timer = 19000;
+    if (window.round == 2) timer = 21000;
     emit(`vote,,${window.round},${window.prompt}`);
 
     window.prompt += 1;
@@ -579,7 +601,7 @@ stage.roundvote = async function() {
           $(`[player=${key}]`).append(sxam)
         }
         // STEP:5 tabulate vote score
-          await sleep(5000);
+          await sleep(7500);
           aud.pause()
         stage.roundvote()
       }
@@ -602,6 +624,7 @@ stage.roundvote = async function() {
           </score>`
         )
       });
+        emit(`lobby,${escape(players.toString())}`)
         await sleep(7000)
         aud.pause()
     }else{
@@ -769,6 +792,29 @@ window.calculateVotes = calculateVotes;
 //   animate characters
 //   send to collin
 // publish to server or electron app
+function tryReconnect() {
+  var {timeStamp, code} = localStorage.getItem("code").split(",") // `${timeStamp},${code}`
+  var name = localStorage.getItem("name") // `${timeStamp},${code}`
+  
+  // if (timeStamp === undefined) return false;
+
+  // if (Date.now() - timeStamp < 10000){ // 10 mins
+  //   $("#roomcode").text(`${code}`)
+  //   $("#name").text(`${name}`)
+  //   var {err, succ} = await to(connect(timeStamp, code))
+  // }
+
+  // if err === "no such server"
+  //   localStorage.removeItem("code")
+  //   $("#roomcode").text("")
+  //   alert("cannot connect")
+
+
+  // client(peer, "reconnect", window.name, code)
+
+}
+// tryReconnect();
+
 
 function clientIntake(data){
   window.datum = data;
@@ -785,11 +831,13 @@ function clientIntake(data){
   }
   if (stage === "lobby"){
     window.playerList = unescape(content).split(",");
-    console.log("playerList");
+    
     var i = playerList.indexOf(window.name)
+    console.log("playerList", i, playerList);
     var style = ``;
+
     if (i === 0){
-      var start = `You're the host! Press Start when everyone is ready! <button type="button" onclick="emit('start')" name="button">Start Game</button>`
+      var start = `You're the host! Press Start when everyone is ready! <button type="button" onclick="emit('start');$(this).attr('disabled',true);setTimeout(function(){$('button').attr('disabled',false)},6500)" name="button">Start Game</button>`
     }else{
       var start = `Waiting for ${playerList[0]} to start!`
     }
@@ -826,6 +874,9 @@ function clientIntake(data){
         return arr;
     },[]).join("")
     $("gameview").html(z)
+    
+    localStorage.setItem("code", `${Date.now()},${window.host}`) // `${timeStamp},${code}`
+    localStorage.setItem("name", `${window.name}`)
     // var n = playerList.length;
     // "<prompt>You should never give alcohol to "BLANK"</prompt>
     //           <input></input>
@@ -1403,7 +1454,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`On the seventh day, God rested. On the eighth day, he BLANK`
 ,`A weird reason to have your car recalled`
 ,`You should always wear a helmet when BLANK`
-,`Few remember Michelangelo's <i>Mona Lisa 2<\/i> which was a painting of BLANK`
+,`Few remember Michelangelo's <i>Mona Lisa 2</i> which was a painting of BLANK`
 ,`Something a kangaroo might search for on Google`
 ,`A bad substitute for a surfboard`
 ,`Where would you live if you were two inches tall?`
@@ -1416,7 +1467,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`What ruined Hannibal "The Cannibal" Lecter's credit score?`
 ,`What the lamest Transformer would morph into`
 ,`You would gladly give money to someone on the street if they asked "Can you spare some change so I can BLANK?"`
-,`SPOILER ALERT: The big plot twist in <i>The Sisterhood of the Traveling Pants 7<\/i> is that the pants BLANK`
+,`SPOILER ALERT: The big plot twist in <i>The Sisterhood of the Traveling Pants 7</i> is that the pants BLANK`
 ,`You know you're a spoiled brat when your tree house has a BLANK`
 ,`What King Kong is most self-conscious about`
 ,`The only reason to ever play a banjo`
@@ -1424,7 +1475,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`How Jonah passed the time stuck inside a giant fish`
 ,`Something that the Keebler Elves chant during a strike`
 ,`The title of the most popular TV show in North Korea, probably`
-,`A quick way to annoy Pat Sajak while playing <i>Wheel of Fortune<\/i>`
+,`A quick way to annoy Pat Sajak while playing <i>Wheel of Fortune</i>`
 ,`The title of a National Public Radio show that would put you to sleep the quickest`
 ,`Where the missing sock in the dryer ends up going`
 ,`The worst part about being seven feet tall`
@@ -1454,7 +1505,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`The real reason Mr. Clean is grinning`
 ,`The best name to give an ugly baby`
 ,`The first thing Abraham Lincoln would do if he came back from the dead`
-,`Come up with a <i>TMZ<\/i> celebrity headline from five years in the future`
+,`Come up with a <i>TMZ</i> celebrity headline from five years in the future`
 ,`What the roller coaster attendant is actually saying during his mumbled preamble before the ride`
 ,`An ad slogan for cardboard: "Now with more BLANK" `
 ,`The most annoying person in a movie theater would BLANK`
@@ -1476,10 +1527,10 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`The worst upstairs neighbors would be people that BLANK`
 ,`The weirdest message your cat could write out to you in its litter box`
 ,`A good nickname for your abs`
-,`The lesser-known sequel to <i>Old Yeller<\/i>: <i>Old Yeller 2: BLANK<\/i>`
+,`The lesser-known sequel to <i>Old Yeller</i>: <i>Old Yeller 2: BLANK</i>`
 ,`A horrible pick-up line`
 ,`The best way to keep a co-worker from stealing your lunch`
-,`The least scary horror movie: <i>Night of the BLANK<\/i>`
+,`The least scary horror movie: <i>Night of the BLANK</i>`
 ,`The worst thing to find when you move into a new house`
 ,`The worst carnival prize you could win`
 ,`The most unusual environmental cause is "BLANK the Whales"`
@@ -1487,7 +1538,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`You wake up 100 years in the future and are shocked to find BLANK`
 ,`A weird thing for a preacher to say to end every sermon`
 ,`A rejected tourism slogan for Des Moines, Iowa: "Home of the BLANK"`
-,`A forgotten book in the classic Harry Potter series: <i>Harry Potter and the BLANK<\/i>`
+,`A forgotten book in the classic Harry Potter series: <i>Harry Potter and the BLANK</i>`
 ,`The weirdest thing a restroom attendant could offer you`
 ,`The worst Thanksgiving Day balloon would be a giant, inflatable BLANK`
 ,`The big, crazy twist at the end of the next M. Night Shamalayan movie: He was BLANK the whole time!`
@@ -1497,8 +1548,8 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`It's not the heat. It's not the humidity. It's the BLANK`
 ,`It's incredibly rude to BLANK with your mouth open`
 ,`You never have a BLANK when you need one`
-,`<i>The Empire Strikes Back<\/i> would've been ruined if Darth Vader said "Luke, I am BLANK"`
-,`The worst 1960s teen movie was definitely <i>BLANK Beach<\/i>`
+,`<i>The Empire Strikes Back</i> would've been ruined if Darth Vader said "Luke, I am BLANK"`
+,`The worst 1960s teen movie was definitely <i>BLANK Beach</i>`
 ,`The most disgusting breakfast cereal: BLANK Flakes`
 ,`In the next big sports scandal, we'll find out that BLANK`
 ,`Worse than global warming, the real threat to humanity is global BLANK`
@@ -1522,7 +1573,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`The worst possible choice for the person on the new $20 bill`
 ,`A little-known lyric in the original draft of the "Star-Spangled Banner"`
 ,`The best thing to shoot out of a cannon`
-,`The winners on <i>The Bachelor<\/i> get a rose. The losers should get BLANK`
+,`The winners on <i>The Bachelor</i> get a rose. The losers should get BLANK`
 ,`From the creators of "Whack-a-Mole" comes the new game "BLANK-a-BLANK"`
 ,`The title of a never-released Jimmy Buffett song`
 ,`The worst thing to hear from your GPS: "In two miles, BLANK"`
@@ -1532,7 +1583,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`America's energy crisis would be over if we made cars that ran on BLANK`
 ,`Something it'd be fun to watch ride an escalator `
 ,`A high school superlative you don't want to win: Most Likely To BLANK`
-,`A rejected title for <i>Moby Dick<\/i>`
+,`A rejected title for <i>Moby Dick</i>`
 ,`Something you do not want to find under your hotel bed`
 ,`You know your doctor has gone insane when he tells you to make sure you BLANK at least once a day`
 ,`The worst part about being a Teenage Mutant Ninja Turtle`
@@ -1568,7 +1619,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`Forget coffee. Don't talk to me until I've had my BLANK`
 ,`Odd new shampoo instructions: "Lather, Rinse, BLANK, Repeat."`
 ,`The worst magic trick`
-,`The lost Hemingway book: <i>The Old Man and the BLANK<\/i>`
+,`The lost Hemingway book: <i>The Old Man and the BLANK</i>`
 ,`The title of a podcast you would never ever listen to`
 ,`The name of a new, terrifying species of spider`
 ,`The most annoying co-worker would constantly BLANK`
@@ -1586,9 +1637,9 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`The last thing you'd want to find in your air ducts`
 ,`The worst college football team: The Fighting BLANK`
 ,`A terrible name for a dragon`
-,`In the future, moviegoers will flock to see <i>Jurassic Park 10: BLANK<\/i>`
+,`In the future, moviegoers will flock to see <i>Jurassic Park 10: BLANK</i>`
 ,`The worst way to unclog a toilet`
-,`Something that's been hiding in the background in every episode of <i>Friends<\/i>`
+,`Something that's been hiding in the background in every episode of <i>Friends</i>`
 ,`We should combine Minnesota and Wisconsin and call them BLANK`
 ,`The name of a cable network that no one watches`
 ,`If the groundhog "kind of" sees his shadow, it's six weeks of BLANK`
@@ -1605,7 +1656,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`The Pyramids would be even more impressive if they contained BLANK`
 ,`What Sam Elliott probably nicknames his mustache`
 ,`The worst theme for your kid's first dance recital`
-,`The worst combination of two actors that could possibly star in the next season of <i>True Detective<\/i> together`
+,`The worst combination of two actors that could possibly star in the next season of <i>True Detective</i> together`
 ,`It's disappointing to put together a 1,000 piece puzzle and realize it's just a picture of BLANK`
 ,`The name of a law firm you shouldn't hire`
 ,`The worst thing to find frozen in an ice cube`
@@ -1628,7 +1679,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`A sign that you're a bad teacher`
 ,`If a genie gives you three wishes, the best things to wish for are: 1) a billion dollars, 2) eternal life, and 3) BLANK`
 ,`The worst charity: Save the BLANK`
-,`Little-known fact: An unaired episode of <i>The Brady Bunch<\/i> had the family dealing with BLANK`
+,`Little-known fact: An unaired episode of <i>The Brady Bunch</i> had the family dealing with BLANK`
 ,`The futuristic invention you can't wait to see exist`
 ,`What's really at the center of the Earth?`
 ,`Invent a new word for the toilet that sounds like it's from Shakespeare`
@@ -1646,7 +1697,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`The one thing you wish a politician would just say already`
 ,`A secret way to get stubborn ketchup out of the bottle`
 ,`The most surprising person to admit to being the Zodiac Killer`
-,`A lesson that probably wouldn't be taught on <i>Sesame Street<\/i>`
+,`A lesson that probably wouldn't be taught on <i>Sesame Street</i>`
 ,`Something you promise to yell if you win this game`
 ,`A creepy thing to find scribbled onto a dollar bill`
 ,`If you don't have extra money, an odd thing to use as a tip for your waiter`
@@ -1671,7 +1722,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`Never pay more than $3 for BLANK`
 ,`The name of a really bizarre diet that just never caught on`
 ,`The most popular T-shirt slogan in Mississippi, probably`
-,`The hit song from the Broadway show <i>Fart: The Musical<\/i>`
+,`The hit song from the Broadway show <i>Fart: The Musical</i>`
 ,`A ridiculous government agency that no one knows about: The Department of BLANK`
 ,`The best thing about being thrown into a volcano`
 ,`The world's most boring video game`
@@ -1720,7 +1771,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`What you think the word "pandiculation" means`
 ,`A body of water you definitely shouldn't swim in`
 ,`Something fun to ask the old wise man on top of the mountain`
-,`A rejected tagline for <i>Star Trek<\/i> instead of "Space: the final frontier" was "Space: BLANK"`
+,`A rejected tagline for <i>Star Trek</i> instead of "Space: the final frontier" was "Space: BLANK"`
 ,`How would YOU fix the economy?`
 ,`The hardest part about living in a submarine`
 ,`If you really, really love something, let it BLANK`
@@ -1793,7 +1844,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`Something you probably shouldn't try to sell on eBay`
 ,`The worst air freshener scent`
 ,`A terrible thing to sign on the cast of your friend's broken leg`
-,`It would be awesome to win <i>Jeopardy<\/i> with the phrase, "What is BLANK, Alex?"`
+,`It would be awesome to win <i>Jeopardy</i> with the phrase, "What is BLANK, Alex?"`
 ,`A sign you probably shouldn't put up in your yard`
 ,`A bad title for a self-help book`
 ,`An unusual "Special Skill" to include on your resume`
@@ -1816,7 +1867,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`You should never BLANK and BLANK at the same time`
 ,`The worst thing about being a billionaire`
 ,`Briefly describe your imaginary friend`
-,`New movie idea: <i>The Muppets Take BLANK<\/i>`
+,`New movie idea: <i>The Muppets Take BLANK</i>`
 ,`What you call a baby sasquatch`
 ,`What is a tree thinking all day?`
 ,`The best use for a leftover meatball`
@@ -1834,7 +1885,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`A little-known fact about the Jolly Green Giant`
 ,`The perfect meal would be a BLANK stuffed in a BLANK stuffed in a BLANK`
 ,`What's black and white and red all over?`
-,`New show idea: <i>America's Next Top BLANK<\/i>`
+,`New show idea: <i>America's Next Top BLANK</i>`
 ,`It never ends well when you mix BLANK and BLANK`
 ,`Invent a silly British term for pooping`
 ,`The best reason to go to Australia`
@@ -1924,7 +1975,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`A rejected phrase for one of those Valentine heart candies`
 ,`Something that will get you thrown out of a Wendy's`
 ,`It would be scary to read on a food package, "May contain trace elements of BLANK."`
-,`A just-so-crazy-it's-brilliant business idea to pitch on <i>Shark Tank<\/i>`
+,`A just-so-crazy-it's-brilliant business idea to pitch on <i>Shark Tank</i>`
 ,`A terrifying fortune cookie fortune`
 ,`Something the devil is afraid of`
 ,`CBS should air a TV show about lawyers who are also BLANK`
@@ -2036,7 +2087,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`Something that would not work as well as skis`
 ,`What to say to get out of jury duty`
 ,`A rejected name for a ship in the U.S. Naval Fleet: the USS BLANK`
-,`A rejected title for <i>The Good, The Bad and the Ugly<\/i> was <i>The Good, the Bad and the BLANK<\/i>`
+,`A rejected title for <i>The Good, The Bad and the Ugly</i> was <i>The Good, the Bad and the BLANK</i>`
 ,`Little-known fact: The government allows peanut butter to contain up to 10% BLANK`
 ,`A good sign that your house is haunted`
 ,`A bad occupation for a robot to have`
@@ -2125,7 +2176,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`A great new invention that starts with "Automatic"`
 ,`Come up with a really bad football penalty that begins with "Intentional"`
 ,`You know you're in for a bad taxi ride when BLANK`
-,`The terrible fate of the snowman Olaf in a director's cut of <i>Frozen<\/i>`
+,`The terrible fate of the snowman Olaf in a director's cut of <i>Frozen</i>`
 ,`Sometimes, after a long day, you just need to BLANK`
 ,`The worst way to spell Mississippi`
 ,`Give me one good reason why I shouldn't spank you right now`
@@ -2142,7 +2193,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`Miller Lite beer would make a lot of money if they came up with a beer called Miller Lite _____`
 ,`Okay... fine! What do YOU want to talk about then?!!!`
 ,`The Katy Perry Super Bowl halftime show would have been better with BLANK`
-,`Your personal catchphrase if you were on one of those <i>Real Housewives<\/i> shows`
+,`Your personal catchphrase if you were on one of those <i>Real Housewives</i> shows`
 ,`A good fake name to use when checking into a hotel`
 ,`A vanity license plate a jerk in an expensive car would get`
 ,`The name of a canine comedy club with puppy stand-up comedians`
@@ -2170,7 +2221,7 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`How many monkeys is too many monkeys?`
 ,`Something you'd be surprised to see a donkey do`
 ,`The title you'd come up with if you were writing the Olympics theme song`
-,`Name the sequel to <i>Titanic<\/i> if there were one. <i>Titanic 2: BLANK<\/i>`
+,`Name the sequel to <i>Titanic</i> if there were one. <i>Titanic 2: BLANK</i>`
 ,`An alternate use for a banana`
 ,`What you'd guess is an unadvertised ingredient in most hot dogs`
 ,`Name your new haircutting establishment`
