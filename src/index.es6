@@ -561,7 +561,7 @@ stage.roundvote = async function() {
       console.log("voteStart");
       var prompt_text = player_prompts.filter(p => p.id == window.prompt)[0]?.p
       var answees = answers.all.filter(ans => (ans.prompt_id == window.prompt)).map(answer => `<answer player="${answer.player_id}"><p>${answer.answer}</p></answer>`)
-      $("prompt").text(prompt_text)
+      $("prompt").html(prompt_text)
       $("answers").html("");
       window.aud = playAudio(shuffle(voteStart)[0])
       changeVideo()
