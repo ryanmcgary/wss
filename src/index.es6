@@ -194,7 +194,7 @@ if (url.hash === "#host" || navigator.userAgent.includes("Electron")){ // HOST
   peer.on("open", function(id) {
     console.log("established" ,id)
     if (id === peerID)
-      $("gamecode").html(`<h4 style="margin-block-start: 0px;margin-block-end: 0px;">Join the game at <span style="color: #4242ff;">rumpus.xyz</span> using your browser and game code:</h4><h2>${code}</h2>`)
+      $("gamecode").html(`<h4 style="margin-block-start: 0px;margin-block-end: 0px;">Join the game at <span style="color: #4242ff;">rumpus.xyz</span> using your browser and use game code:</h4><h2>${code}</h2>`)
   });
   peer.on('error', function(err) {
       console.log("Error: ", err);
@@ -560,7 +560,7 @@ stage.roundvote = async function() {
     // STEP:4 Start voting
       console.log("voteStart");
       var prompt_text = player_prompts.filter(p => p.id == window.prompt)[0]?.p
-      var answees = answers.all.filter(ans => (ans.prompt_id == window.prompt)).map(answer => `<answer player="${answer.player_id}"><p>${answer.answer}</p></answer>`)
+      var answees = answers.all.filter(ans => (ans.prompt_id == window.prompt)).map(answer => `<answer player="${answer.player_id}"><p>${answer.answer.replace('{COMMA}',',')}</p></answer>`)
       $("prompt").html(prompt_text)
       $("answers").html("");
       window.aud = playAudio(shuffle(voteStart)[0])
@@ -867,7 +867,7 @@ function clientIntake(data){
           arr.push(`
             <prompt>${prompt.p}
               <input></input>
-              <button onclick="emit('answer,${n},${prompt.round},${prompt.id},' + this.previousElementSibling.value);this.parentElement.remove();emptyGameview();">submit</button>
+              <button onclick="emit('answer,${n},${prompt.round},${prompt.id},' + this.previousElementSibling.value.replace(',','{COMMA}'));this.parentElement.remove();emptyGameview();">submit</button>
             </prompt>
           `)
         }
@@ -893,7 +893,7 @@ function clientIntake(data){
           arr.push(`
             <prompt>${prompt.p}
               <input></input>
-              <button onclick="emit('answer,${n},${prompt.round},${prompt.id},' + this.previousElementSibling.value);this.parentElement.remove();emptyGameview();">submit</button>
+              <button onclick="emit('answer,${n},${prompt.round},${prompt.id},' + this.previousElementSibling.value.replace(',','{COMMA}'));this.parentElement.remove();emptyGameview();">submit</button>
             </prompt>
           `)
         }
@@ -915,11 +915,11 @@ function clientIntake(data){
       console.log("VOTE BITH ERROR", round, prompt_id);
       var prompt_text = gp[round][prompt_id % playerList.length]?.p
       var prompt_answer = window.answers.filter((b)=>{ return (b.prompt_id == prompt_id)} )
-      var prompt_ui = prompt_answer.map(pa => `<button onclick="emit('vote,${n},${pa.player_id},${pa.round_id},${pa.prompt_id}');this.parentElement.remove();nextStage('Nice Vote! ')">${pa.answer}</button>`).join("")
+      var prompt_ui = prompt_answer.map(pa => `<button onclick="emit('vote,${n},${pa.player_id},${pa.round_id},${pa.prompt_id}');this.parentElement.remove();nextStage('Nice Vote! ')">${pa.answer.replace('{COMMA}',',')}</button>`).join("")
       if (round == 2){
         prompt_ui = prompt_answer.map(pa =>{
           if (window.n != pa.player_id){
-            return `<button onclick="emit('vote,${n},${pa.player_id},${pa.round_id},${pa.prompt_id}');this.remove();">${pa.answer}</button>` // TODO: remove buttons after 3 clicks
+            return `<button onclick="emit('vote,${n},${pa.player_id},${pa.round_id},${pa.prompt_id}');this.remove();">${pa.answer.replace('{COMMA}',',')}</button>` // TODO: remove buttons after 3 clicks
           }
         }).filter(item => !!item).join("");
       }

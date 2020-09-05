@@ -220,7 +220,7 @@
   <gameview>
     <join>
       Four Letter Game Code<br><input id="roomcode" type="text"><br>
-      Your Player Name<br><input id="name" type="text" maxlength="12"><br>
+      Your Player Name<br><input id="name" type="text" maxlength="12" onkeyup="this.value = this.value.replace(',','')"><br>
       <button onclick="client();$('form').remove();$(this).attr('disabled',true);setTimeout(function(){$('button').attr('disabled',false)}, 6000);" type="button" name="button">Join!</button>
     </join>
   </gameview>
