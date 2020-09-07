@@ -19283,6 +19283,33 @@ var define;
 // problems 
 // x leaving during lobby phase doesn't remove player from players array
 // you can submit prompt when not connected
+function errors(err) {
+  switch (err.type) {
+    case "browser-incompatible": // alert("Your browser is not compatible, please upgrade.")
+
+    case "disconnected":
+    case "invalid-id":
+    case "invalid-key":
+    case "network":
+      alert("Disconnected from Game Server. Check your connection and start a new game.");
+      $("gamecode h2").text("");
+      break;
+
+    case "peer-unavailable":
+      alert("Cannot connect to game.");
+
+    case "ssl-unavailable":
+    case "server-error": // alert("Cannot connect to server, check internet connection.")
+
+    case "socket-error":
+    case "socket-closed":
+    case "unavailable-id":
+    case "webrtc":
+  }
+}
+
+window.errors = errors;
+
 function checkConnected(counter = 0, timer = Date.now()) {
   if (window.peer) {
     for (let [key, conn] of Object.entries(peer.connections)) {
@@ -19446,22 +19473,22 @@ if (url.hash !== "#host" && !navigator.userAgent.includes("Electron")) {
       hidden = "hidden", visibilityChange = "visibilitychange", visibilityState = "visibilityState";
     } else if (typeof document.msHidden !== "undefined") {
       hidden = "msHidden", visibilityChange = "msvisibilitychange", visibilityState = "msVisibilityState";
-    }
+    } // var document_hidden = document[hidden];
+    // document.addEventListener(visibilityChange, function() {
+    //   if(document_hidden != document[hidden]) {
+    //     if(document[hidden]) {
+    //       console.log("hidden")
+    //       window.clearInterval(monitorConnection);
+    //       window.monitorConnection = setInterval(checkConnected, 3000);
+    //     } else {
+    //       console.log("show")
+    //       window.clearInterval(monitorConnection);
+    //       window.monitorConnection = setInterval(checkConnected, 3000);
+    //     }
+    //     document_hidden = document[hidden];
+    //   }
+    // });
 
-    var document_hidden = document[hidden];
-    document.addEventListener(visibilityChange, function () {
-      if (document_hidden != document[hidden]) {
-        if (document[hidden]) {
-          console.log("hidden");
-          checkConnected(timer = 0);
-        } else {
-          console.log("show");
-          checkConnected(timer = 0);
-        }
-
-        document_hidden = document[hidden];
-      }
-    });
   });
 }
 
@@ -19485,6 +19512,8 @@ if (url.hash === "#host" || navigator.userAgent.includes("Electron")) {
   });
   peer.on('error', function (err) {
     console.log("Error: ", err);
+    (window.errs = window.errs || []).push(err);
+    errors(err);
   });
   peer.on('connection', function (conn) {
     // if any users disconnect after game start, reconnect to server
@@ -19626,7 +19655,8 @@ function client(peer, prefix = "wordsaladsandwich", name, host) {
   });
   window.peer.on('connection', function (conn) {
     conn.on('open', function () {
-      window.monitorConnection = setInterval(checkConnected, 2000);
+      window.clearInterval(window.monitorConnection);
+      window.monitorConnection = setInterval(checkConnected, 3000);
       localStorage.removeItem("code");
       console.log("client open", conn); // need to hide "join game button once this is recieved"
       // emit(`name,${name}`) don't need to use, using metadata instead
@@ -19640,6 +19670,7 @@ function client(peer, prefix = "wordsaladsandwich", name, host) {
   });
   window.peer.on('error', function (err) {
     console.log("Error: ", err);
+    (window.errs = window.errs || []).push(err); // Error:  Error: Could not connect to peer reconnect-ULCJ
   });
   console.log("hostID", host, peer); // recheck();
 }
@@ -19712,7 +19743,7 @@ stage.processAnswers = function (phase, player_id, round_id, prompt_id, content)
     answer: content
   });
 
-  if (answers.all.filter(ans => ans.round_id == round_id && ans.player_id == player_id).length == 2) {
+  if (answers.all.filter(ans => ans.round_id == round_id && ans.player_id == player_id).length == 2 || answers.all.filter(ans => ans.round_id == 2 && ans.player_id == player_id).length == 1) {
     $(`#${player_id}`).removeClass("waiting");
   } // }
 
@@ -19887,6 +19918,7 @@ stage.roundvote = async function () {
             <p class="score">${parseInt(el.score)}</p>
           </score>`);
       });
+      emit(`lobby,${escape(players.toString())}`);
       return true;
     } // END OF GAME
     // STEP:4 Start voting
@@ -20212,7 +20244,7 @@ function clientIntake(data) {
   }; // stages[stage](content)
 
   if (stage === "blank") {
-    $("gameview").html("Wait for the next stage!");
+    $("gameview").html(`<span class="text">Wait for the next stage!</span>`);
   }
 
   if (stage === "lobby") {
@@ -20222,9 +20254,9 @@ function clientIntake(data) {
     var style = ``;
 
     if (i === 0) {
-      var start = `You're the host! Press Start when everyone is ready! <button type="button" onclick="emit('start');$(this).attr('disabled',true);setTimeout(function(){$('button').attr('disabled',false)},6500)" name="button">Start Game</button>`;
+      var start = `<span class="text">You're the host! Press Start when everyone is ready!</span> <button type="button" onclick="emit('start');$(this).attr('disabled',true);setTimeout(function(){$('button').attr('disabled',false)},6500)" name="button">Start Game</button>`;
     } else {
-      var start = `Waiting for ${playerList[0]} to start!`;
+      var start = `<span class="text">Waiting for ${playerList[0]} to start!</span>`;
     }
 
     var innerHTML = `
@@ -20332,7 +20364,7 @@ function clientIntake(data) {
     if (prompt_text) {
       $("gameview").html(innerHTML);
     } else {
-      $("gameview").html("Your answer is being voted on.");
+      $("gameview").html(`<span class="text">Your answer is being voted on.</span>`);
     }
 
     console.log("vote", stage, content, round); // $("playergame phase").addClass("hide")
@@ -20352,13 +20384,13 @@ function clientIntake(data) {
 window.clientIntake = clientIntake;
 
 function nextStage(pre = "") {
-  $("gameview").html(pre + "Wait for the next stage!");
+  $("gameview").html(`<span class="text">${pre}Wait for the next stage!</span>`);
 }
 
 window.nextStage = nextStage;
 
 function emptyGameview(pre = "") {
-  if ($("gameview").text().trim() === "") $("gameview").html("Wait for the next stage!");
+  if ($("gameview").text().trim() === "") $("gameview").html(`<span class="text">Wait for the next stage!</span>`);
 }
 
 window.emptyGameview = emptyGameview;

@@ -9,7 +9,8 @@ play with recording question files
 send stuff to collin
 
 
-
+localStorage.getItem("code")
+localStorage.setItem("code", code)
 
 // playAudio("./data/audio10.m4a")
 
