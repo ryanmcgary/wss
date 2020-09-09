@@ -1,3 +1,11 @@
+// On connect > 
+//   get ts / persistent code for host
+
+
+// Host: get connections list
+
+ // if current player list is not same as initial player list
+
 // const fs = require('fs')
 
 // var chars_folder = './data/characters'
@@ -54,7 +62,7 @@ function checkConnected(counter = 0, timer = Date.now()){
       }else{
           $("#vis").html("</div>reconnecting</div><div id='loading'></div>");
           // MODAL Disconnected from Game, Trying to Reconnect
-          client(peer, "reconnect", window.name, window.host)
+          client(peer, window.name, window.host)
       }
     }
   }
@@ -175,6 +183,7 @@ var _ = require('lodash');
 window._ = _;
 
 
+var initTime = Date.now();
 
 var url = new URL(window.location.href);
 if (url.hash !== "#host" && !navigator.userAgent.includes("Electron")){ // HOST
@@ -206,13 +215,31 @@ if (url.hash !== "#host" && !navigator.userAgent.includes("Electron")){ // HOST
     // });
   });
 }
+function checkClientList() {
+  var clientArray = _.reduce(peer.connections, (arr, conns)=>{
+    var meta = _.reduce(conns, (arr, conn)=>{
+         if (conn.open && conn.peerConnection.connectionState === "connected" && conn.peerConnection.localDescription.type === "answer") arr.push(conn.metadata);
+        return arr;
+    }, []);
+    arr.push(meta)
+    return arr;
+  }, [])
+  var clientArrayFlat = clientArray.flat().filter(Boolean)
+  players2 = [...new Set(clientArrayFlat)]
+
+  if (players.sort().toString() !== players2.sort().toString()){
+    return true
+  }
+
+}
+
 
 window.DATA_FEEDS = [];
 
 if (url.hash === "#host" || navigator.userAgent.includes("Electron")){ // HOST
   var code = makeid(4)
   var peerID = `wordsaladsandwich-${code}`
-  var peerID_reconnect = `reconnect-${code}`
+  var peerID_reconnect = `${initTime}-${code}`
   var innerHTML = `Room code is ${code}`
 
   window.peer = //new Peer();
@@ -236,11 +263,15 @@ if (url.hash === "#host" || navigator.userAgent.includes("Electron")){ // HOST
     // if any users disconnect after game start, reconnect to server
     conn.on('close', function(){
       console.log('closed what', conn, peer.disconnected, window.phase)
-      if (window.phase !== "lobby"){ ///FIXEEE
+      if (window.phase !== "lobby" || window.player_prompts){ ///FIXEEE
         console.log('closed', conn)
-      
-        peer._lastServerId = peerID_reconnect
-        peer.reconnect();
+        
+        if (checkClientList()){
+          peer._lastServerId = peerID_reconnect
+          peer.reconnect();  
+        }
+        
+        
       }else { // if player drops during lobby phase 
         console.log('closed else', conn)
         var playerIndex = players.indexOf(conn.metadata)
@@ -248,14 +279,17 @@ if (url.hash === "#host" || navigator.userAgent.includes("Electron")){ // HOST
         window.stage.lobby();
       }
     });
-    conn.on('error', function(err){console.log('err', err, conn)});
+    conn.on('error', function(err){
+      console.log('err', err, conn)
+
+    });
     conn.on('open', function(){
       // here you have conn.id
 
-      var conn2 = peer.connect(conn.peer);
+      var conn2 = peer.connect(conn.peer, {metadata: initTime});
       DATA_FEEDS.push(conn2);
       
-      if (peer.id?.includes("reconnect")){
+      if (window.jam && !jam[jam.length - 1]?.includes("lobby")){
         console.log("reconnect reestablish", last_emitted_payload)
         setTimeout(function () {
           jam.forEach(function(payload){
@@ -264,7 +298,7 @@ if (url.hash === "#host" || navigator.userAgent.includes("Electron")){ // HOST
           
           // send payload
           // try and figure out why players is dropping player on host
-        }, 500);
+        }, 2000);
       }else{
         setTimeout(function () {
           hostIntake(undefined, "join")
@@ -277,9 +311,12 @@ if (url.hash === "#host" || navigator.userAgent.includes("Electron")){ // HOST
         console.log('closed what 2', conn)
         if (window.phase !== "lobby" && peer.disconnected){
           console.log('closed if2', conn)
-        
-          peer._lastServerId = peerID_reconnect
-          peer.reconnect();
+          
+          if (checkClientList()){
+            peer._lastServerId = peerID_reconnect // changes host signal server id to reconnect-${CODE}
+            peer.reconnect(); // connects host to signalling server
+          }
+
         }else
         if (window.phase === "lobby" && conn.peerConnection.connectionState === "failed"){
           console.log('closed else2', conn)
@@ -333,7 +370,8 @@ window.offset = offset;
 window.makeid = makeid;
 
 
-function client(peer, prefix = "wordsaladsandwich", name, host){
+function client(peer, name, host){
+  var prefix = "wordsaladsandwich"
   var host = (host || $("#roomcode")[0].value.toUpperCase());
   window.host = host;
   var name = (name || $("#name")[0].value);
@@ -353,9 +391,9 @@ function client(peer, prefix = "wordsaladsandwich", name, host){
 
   if (localStorage.getItem("code")) var [timeStamp, code] = localStorage.getItem("code").split(","); // `${timeStamp},${code}`
 
-  if (host === code && Date.now() - timeStamp < 1200000) { // 
-    hostID = `reconnect-${host}`
-    name = (localStorage.getItem("name") || name)
+  if (host === code && Date.now() - timeStamp < 1200000 || (window.datumArr && !datumArr[datumArr.length - 1].includes("lobby")) ) { // 
+    hostID = `${window.hostTime || timeStamp}-${host}`
+    name = (name || localStorage.getItem("name"))
   }
 
   window.peer.on("open", function(id) {
@@ -367,7 +405,8 @@ function client(peer, prefix = "wordsaladsandwich", name, host){
       window.clearInterval(window.monitorConnection);
       window.monitorConnection = setInterval(checkConnected, 3000);
       localStorage.removeItem("code");
-      console.log("client open",conn); // need to hide "join game button once this is recieved"
+      console.log("client open",conn, conn.metadata); // need to hide "join game button once this is recieved"
+      window.hostTime = conn.metadata;
       // emit(`name,${name}`) don't need to use, using metadata instead
       DATA_FEEDS.push(conn);
     });
@@ -380,9 +419,14 @@ function client(peer, prefix = "wordsaladsandwich", name, host){
   window.peer.on('error', function(err) {
       console.log("Error: ", err);
       (window.errs = window.errs || []).push(err)
+      if (err.type === "peer-unavailable" && errs[0].message.includes("wordsaladsandwich")){
+        hostID = `${window.hostTime || timeStamp}-${host}`
+        name = (name || localStorage.getItem("name"))
+        window.peer.connect(hostID, {metadata: name});
+      }
       // Error:  Error: Could not connect to peer reconnect-ULCJ
   });
-  console.log("hostID", host, peer);
+  console.log("hostID", hostID, host, peer);
   // recheck();
 }
 window.client = client;
@@ -406,7 +450,7 @@ function initHost(){
   window.players = (window.players || []);
   window.stage = (window.stage || {});
   window.answers = {all:[], 0:[],1:[],2:[]}
-
+  window.votes = []
   // ["n", "j", "z", "player_prompts", "lastData", "lastConn", "aud", "prompt_array", "prompt_round", "last_prompt"]
 }
 initHost()
@@ -455,7 +499,7 @@ window.last_emitted_payload = ""
 stage.lobby = function() {
   var clientArray = _.reduce(peer.connections, (arr, conns)=>{
     var meta = _.reduce(conns, (arr, conn)=>{
-         if (conn.open && conn.peerConnection.connectionState === "connected") arr.push(conn.metadata);
+         if (conn.open && conn.peerConnection.connectionState === "connected" && conn.peerConnection.localDescription.type === "answer") arr.push(conn.metadata);
         return arr;
     }, []);
     arr.push(meta)
@@ -476,17 +520,7 @@ stage.lobby = function() {
 }
 stage.lockInit = async function() {
     initHost();
-  // players
-    var clientArray = _.reduce(peer.connections, (arr, conns)=>{
-      var meta = _.reduce(conns, (arr, conn)=>{
-           if (conn.open) arr.push(conn.metadata);
-          return arr;
-      }, []);
-      arr.push(meta)
-      return arr;
-    }, [])
-    var clientArrayFlat = clientArray.flat().filter(Boolean)
-    players = [...new Set(clientArrayFlat)]
+
     emit(`playerList,${escape(players.toString())}`)
 
   // prompts
@@ -510,17 +544,21 @@ stage.lockInit = async function() {
     })
     window.player_prompts = gp.flat();
     // STEP:2 Game start button pressed: Send prompts and trigger first item
-      console.log("introRound1");
-      changeVideo()
-      $("gamecode").html("<h2>Round 1</h2>");
-      await sleep(300)
-      $("player").addClass("waiting");
-      window.aud = playAudio(shuffle(introRound1)[0])
-      await sleep(5000)
-      aud.pause()
+
+    window.peer?.disconnect()
+    
+    console.log("introRound1");
+    changeVideo()
+    $("gamecode").html("<h2>Round 1</h2>");
+    await sleep(300)
+    $("player").addClass("waiting");
+    window.aud = playAudio(shuffle(introRound1)[0])
+    await sleep(5000)
+    aud.pause()
+
     emit(`promptList,${escape(JSON.stringify(gp))}`); // sends prompts and triggers first round of answer gathering
     stage.roundprompts(); // starts roundprompt loop and the timer on host
-    window.peer?.disconnect()
+    
 }
 
 const sleep = m => new Promise(r => setTimeout(r, m))
@@ -553,6 +591,7 @@ stage.roundprompts = function(triggerRender) {
           window.aud = playAudio(shuffle(answerCountdownDone)[0])
           $("player").addClass("scale-out");
           await sleep(600)
+          $("player").removeClass("waiting");
           $("gamecode").html("");
           changeVideo()
           await sleep(5000)
@@ -907,7 +946,7 @@ function clientIntake(data){
           arr.push(`
             <prompt>${prompt.p}
               <input></input>
-              <button onclick="emit('answer,${n},${prompt.round},${prompt.id},' + this.previousElementSibling.value.replace(',','{COMMA}'));this.parentElement.remove();emptyGameview();">submit</button>
+              <button onclick="if (this.previousElementSibling.value.length > 1){emit('answer,${n},${prompt.round},${prompt.id},' + this.previousElementSibling.value.replace(',','{COMMA}'));this.parentElement.remove();emptyGameview();}">submit</button>
             </prompt>
           `)
         }
@@ -915,7 +954,7 @@ function clientIntake(data){
     },[]).join("")
     $("gameview").html(z)
     
-    localStorage.setItem("code", `${Date.now()},${window.host}`) // `${timeStamp},${code}`
+    localStorage.setItem("code", `${window.hostTime},${window.host}`) // `${timeStamp},${code}`
     localStorage.setItem("name", `${window.name}`)
     // var n = playerList.length;
     // "<prompt>You should never give alcohol to "BLANK"</prompt>
@@ -933,7 +972,7 @@ function clientIntake(data){
           arr.push(`
             <prompt>${prompt.p}
               <input></input>
-              <button onclick="emit('answer,${n},${prompt.round},${prompt.id},' + this.previousElementSibling.value.replace(',','{COMMA}'));this.parentElement.remove();emptyGameview();">submit</button>
+              <button onclick="if (this.previousElementSibling.value.length > 1){emit('answer,${n},${prompt.round},${prompt.id},' + this.previousElementSibling.value.replace(',','{COMMA}'));this.parentElement.remove();emptyGameview();}">submit</button>
             </prompt>
           `)
         }
@@ -1331,7 +1370,6 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`Bad advice for new graduates`
 ,`The best way to tell if someone is dead`
 ,`A terrible talent to have for the Miss America Pageant`
-,`The worst`
 ,`Tomorrow's news headline: Scientists Are Shocked to Discover That "BLANK"`
 ,`The worst material with which to make a snowman`
 ,`A terrible sportscaster catchphrase for when somebody dunks a basketball`
@@ -1868,7 +1906,6 @@ var prompts = [`What two words would passengers never want to hear a pilot say?`
 ,`Come up with a slogan for the Russian Tourism Board`
 ,`The best part about being Donald Trump`
 ,`Tip: Never eat at a place called "Kentucky Fried BLANK"`
-,`Sometimes John Travolta wildly mispronounces names. How might he wildly mispronounce his own name?`
 ,`The worst toy store: Build-A-BLANK Workshop`
 ,`The weirdest thing you can buy at the Vatican gift shop`
 ,`The worst invention that starts with "Spray-On"`
