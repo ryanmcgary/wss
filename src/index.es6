@@ -50,21 +50,19 @@ window.errors = errors;
 
 function checkConnected(counter = 0, timer = Date.now()){
   if (window.peer){
-    for (let [key, conn] of Object.entries(peer.connections)) {
-      if (conn.some(arr => arr.peerConnection.connectionState === "connected")){
-        console.log('hi'); 
-        if ($("#vis").text().includes("reconnecting")){
-          $("#vis").html("</div>connected!</div>");  
-        }else{
-          $("#vis").html("");  
-        }
-        return "connected";
+    if (Object.values(peer.connections).flat().some(arr => arr.peerConnection.connectionState === "connected")){
+      console.log('hi'); 
+      if ($("#vis").text().includes("reconnecting")){
+        $("#vis").html("</div>connected!</div>");  
       }else{
-          $("#vis").html("</div>reconnecting</div><div id='loading'></div>");
-          // MODAL Disconnected from Game, Trying to Reconnect
-          client(peer, window.name, window.host)
+        $("#vis").html("");  
       }
-    }
+      return "connected";
+    }else{
+        $("#vis").html("</div>reconnecting</div><div id='loading'></div>");
+        // // MODAL Disconnected from Game, Trying to Reconnect
+        client(peer, window.name, window.host)
+    } 
   }
 }
 window.checkConnected = checkConnected;
@@ -371,12 +369,16 @@ window.makeid = makeid;
 
 
 function client(peer, name, host){
-  var prefix = "wordsaladsandwich"
+  if (localStorage.getItem("code")) 
+    var [timeStamp, code] = localStorage.getItem("code").split(","); // `${timeStamp},${code}`
+  var prefix = ""
   var host = (host || $("#roomcode")[0].value.toUpperCase());
   window.host = host;
   var name = (name || $("#name")[0].value);
   window.name = name;
-  var hostID = `${prefix}-${host}`;
+  var hostID = `wordsaladsandwich-${host}`;
+  var hostIDTimeCode = `${timeStamp}-${host}`;
+
   closer()
   window.peer?.destroy();
 
@@ -389,21 +391,30 @@ function client(peer, name, host){
   // peer = window.peer
   
 
-  if (localStorage.getItem("code")) var [timeStamp, code] = localStorage.getItem("code").split(","); // `${timeStamp},${code}`
+// this isn't quite working try
+  // if code exists and it's same as form and there's been a refresh
+  //   > try connecting to both since that's how emit works
+  // if disconnect has occured and we are still in initial session
+  //   > try connecting to both since that's how emit works
 
-  if (host === code && Date.now() - timeStamp < 1200000 || (window.datumArr && !datumArr[datumArr.length - 1].includes("lobby")) ) { // 
-    hostID = `${window.hostTime || timeStamp}-${host}`
-    name = (name || localStorage.getItem("name"))
-  }
+  
 
   window.peer.on("open", function(id) {
     var host = window.peer.connect(hostID, {metadata: name});
+    var hostTimeCode = window.peer.connect(hostIDTimeCode, {metadata: name});
+    // FIX: At some point you'll need to check if both connect and if so prefer hostTimeCode and drop host
+    // because that is the specific one, and the other is a new random generated one
     DATA_FEEDS.push(host);
+    DATA_FEEDS.push(hostTimeCode);
   });
   window.peer.on('connection', function(conn) {
     conn.on('open', function(){
-      window.clearInterval(window.monitorConnection);
-      window.monitorConnection = setInterval(checkConnected, 3000);
+      (window.intervalIDs = window.intervalIDs || [])
+      window.intervalIDs.forEach( function(e, i) {
+        window.clearInterval(e);
+      });
+      var monitorConnection = setInterval(checkConnected, 5100);
+      (window.intervalIDs = window.intervalIDs || []).push(monitorConnection);
       localStorage.removeItem("code");
       console.log("client open",conn, conn.metadata); // need to hide "join game button once this is recieved"
       window.hostTime = conn.metadata;
@@ -418,12 +429,12 @@ function client(peer, name, host){
   })
   window.peer.on('error', function(err) {
       console.log("Error: ", err);
-      (window.errs = window.errs || []).push(err)
-      if (err.type === "peer-unavailable" && errs[0].message.includes("wordsaladsandwich")){
-        hostID = `${window.hostTime || timeStamp}-${host}`
-        name = (name || localStorage.getItem("name"))
-        window.peer.connect(hostID, {metadata: name});
-      }
+      // (window.errs = window.errs || []).push(err)
+      // if (err.type === "peer-unavailable" && err.message.includes("wordsaladsandwich")){
+      //   hostID = `${window.hostTime || timeStamp}-${host}`
+      //   name = (name || localStorage.getItem("name"))
+      //   window.peer.connect(hostID, {metadata: name});
+      // }
       // Error:  Error: Could not connect to peer reconnect-ULCJ
   });
   console.log("hostID", hostID, host, peer);
@@ -546,7 +557,7 @@ stage.lockInit = async function() {
     // STEP:2 Game start button pressed: Send prompts and trigger first item
 
     window.peer?.disconnect()
-    
+
     console.log("introRound1");
     changeVideo()
     $("gamecode").html("<h2>Round 1</h2>");
@@ -911,6 +922,9 @@ function clientIntake(data){
   if (stage === "lobby"){
     window.playerList = unescape(content).split(",");
     
+    localStorage.setItem("code", `${window.hostTime},${window.host}`) // `${timeStamp},${code}`
+    localStorage.setItem("name", `${window.name}`)
+    
     var i = playerList.indexOf(window.name)
     console.log("playerList", i, playerList);
     var style = ``;
@@ -954,8 +968,6 @@ function clientIntake(data){
     },[]).join("")
     $("gameview").html(z)
     
-    localStorage.setItem("code", `${window.hostTime},${window.host}`) // `${timeStamp},${code}`
-    localStorage.setItem("name", `${window.name}`)
     // var n = playerList.length;
     // "<prompt>You should never give alcohol to "BLANK"</prompt>
     //           <input></input>
