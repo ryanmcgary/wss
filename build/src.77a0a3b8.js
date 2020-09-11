@@ -19275,10 +19275,13 @@ var define;
 }.call(this));
 
 },{"buffer":"../node_modules/buffer/index.js"}],"index.es6":[function(require,module,exports) {
-// On connect > 
-//   get ts / persistent code for host
-// Host: get connections list
-// if current player list is not same as initial player list
+//  x CHECK RE-launch game to make sure characters are still displayed
+//  Change sizing so overscroll doesn't happen
+//  Add/record audio
+//. show more animation characters
+//  add points animatin
+//  show gold/silver/bronze color of votes on last round
+//  after x seconds click reconnect link to refresh page
 // const fs = require('fs')
 // var chars_folder = './data/characters'
 // var characters = fs.readdirSync(chars_folder)
@@ -19673,11 +19676,6 @@ function client(peer, name, host) {
     path: '/'
   }); // have to initialize this every time because library won't let you delete hanged connectoin attempts
   // peer = window.peer
-  // this isn't quite working try
-  // if code exists and it's same as form and there's been a refresh
-  //   > try connecting to both since that's how emit works
-  // if disconnect has occured and we are still in initial session
-  //   > try connecting to both since that's how emit works
 
   window.peer.on("open", function (id) {
     var host = window.peer.connect(hostID, {
@@ -19752,9 +19750,9 @@ initHost();
 window.initHost = initHost;
 
 function hostIntake(user, data) {
-  var [phase, player_id, round_id, prompt_id, content] = data.split(",");
-  stage[phase](phase, player_id, round_id, prompt_id, content);
-  console.log("hostIntake", "phase", phase, "player_id", player_id, "round_id", round_id, "prompt_id", prompt_id, "content", content); // if (phase_id === start)
+  var [phase, player_id, round_id, prompt_id, content, more] = data.split(",");
+  stage[phase](phase, player_id, round_id, prompt_id, content, more);
+  console.log("hostIntake", "phase", phase, "player_id", player_id, "round_id", round_id, "prompt_id", prompt_id, "content", content, "more", more); // if (phase_id === start)
   // if (phase_id === prompts)
   // if (phase_id === vote);
 }
@@ -19858,6 +19856,7 @@ stage.lockInit = async function () {
   $("gamecode").html("<h2>Round 1</h2>");
   await sleep(300);
   $("player").addClass("waiting");
+  $("player").removeClass("scale-out");
   window.aud = playAudio(shuffle(introRound1)[0]);
   await sleep(5000);
   aud.pause();
@@ -20000,8 +19999,16 @@ stage.roundvote = async function () {
         for (let [key, score] of Object.entries(tt)) {
           $(`[player=${key}]`).append(`<p>${players[key]}</p>`);
           var sxam = votes.filter(vote => vote.prompt == prom && vote.votee == key).map(vote => {
-            return `<div class="vvv"><player id="${vote.voter}"><p>${players[vote.voter]}</p><img src="./data/characters/${characters[vote.voter]}"></player></div>`;
+            return `<div class="vvv"><player id="${vote.voter}"><img src="./data/characters/${characters[vote.voter]}"><p>${players[vote.voter]}</p></player></div>`;
           }).join("");
+
+          if (window.round == 2) {
+            // NEW FEATURE
+            var sxam = votes.filter(vote => vote.prompt == prom && vote.votee == key).map(vote => {
+              return `<div class="vvv final ${vote.color}"><player id="${vote.voter}"><img src="./data/characters/${characters[vote.voter]}"><p>${players[vote.voter]}</p></player></div>`;
+            }).join("");
+          }
+
           $(`[player=${key}]`).append(sxam);
         } // STEP:5 tabulate vote score
 
@@ -20099,12 +20106,13 @@ stage.roundvote = async function () {
 
 window.votes = []; // {voter:, votee:, round:, prompt:}
 
-stage.vote = function (phase, player_id, votee, round_id, prompt_id) {
+stage.vote = function (phase, player_id, votee, round_id, prompt_id, color) {
   votes.push({
     voter: player_id,
     votee: votee,
     round: round_id,
-    prompt: prompt_id
+    prompt: prompt_id,
+    color: color
   });
 };
 
@@ -20384,7 +20392,7 @@ function clientIntake(data) {
       if (round == 2) {
         prompt_ui = prompt_answer.map(pa => {
           if (window.n != pa.player_id) {
-            return `<button onclick="emit('vote,${n},${pa.player_id},${pa.round_id},${pa.prompt_id}');this.remove();">${pa.answer.replace('{COMMA}', ',')}</button>`; // TODO: remove buttons after 3 clicks
+            return `<button color="gold" onclick="emit('vote,${n},${pa.player_id},${pa.round_id},${pa.prompt_id},' + this.getAttribute('color'));this.remove();$('button[color=silver]').attr('color', 'bronze');$('button[color=gold]').attr('color', 'silver');">${pa.answer.replace('{COMMA}', ',')}</button>`; // TODO: remove buttons after 3 clicks
           }
         }).filter(item => !!item).join("");
       }
@@ -20548,7 +20556,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50982" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58332" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

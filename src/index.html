@@ -73,11 +73,14 @@
       transform: scale(0);
     }
     div.vvv {position: relative;display: table;}
+
     .vvv player{position: relative;;left: 0;z-index: -1;display: inline-flex;}
     .vvv player img{
-      position: absolute;
       z-index: -1;
       height: 52px;
+      max-height: 47px;
+      width: 63px;
+      object-fit: contain;
     }
     answer div.vvv player p{
       margin-block-start: 0;
@@ -86,6 +89,16 @@
       font-family: auto;
       background: none;
       padding: 0px;
+    }
+
+    answer .last-round img.silver{
+      max-width: 30px;
+      background-color: silver;
+      border-radius: 15px;
+      box-shadow: 2px 2px 9px silver;
+      max-height: 24px;
+      width: 27px;
+      object-fit: contain;
     }
 
     answer p:first-child{
@@ -97,13 +110,16 @@
       font-family:serif;
       background:black;
       margin-block-start: 0px;
+      margin-block-end: 0.5em;
     }
     answer{
       display: inline-block;
-      padding: 20px;
+      padding: 10px;
       margin: 10px;
       font-size: 1.5em;
       vertical-align: top;
+      max-width: 28vw;
+      min-width: 28vw;
     }
     body{text-align: center;}
     .restart {
@@ -206,6 +222,44 @@
       display: inline-block;
       vertical-align: middle;
       line-height: normal;
+    }
+
+
+    .vvv.final player p {
+      display: none;
+    }
+    div.vvv.final {
+      display: inline-block;
+    }
+    .vvv.final player img{
+      z-index: -1;
+      max-width: 30px;
+      max-height: 24px;
+      width: 27px;
+      border-radius: 15px;
+      object-fit: contain;
+    }
+    .vvv.final.gold img{
+      background-color: gold;
+      box-shadow: 2px 2px 9px gold;
+    }
+    .vvv.final.silver img{
+      background-color: silver;
+      box-shadow: 2px 2px 9px silver;
+    }
+    .vvv.final.bronze img{
+      background-color: #cd7f32;
+      box-shadow: 2px 2px 9px #cd7f32;
+    }
+    
+    [color=gold]{
+      background-color: gold;
+    }
+    [color=silver]{
+      background-color: silver;
+    }
+    [color=bronze]{
+      background-color: #cd7f32;
     }
 
   </style>

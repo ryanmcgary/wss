@@ -1,2 +1,339 @@
-<html><head><title>Enter your code at Rumpus.XYZ</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="X-UA-Compatible" content="ie=edge"><style>score p.score{background-color:transparent;padding:5px 20px;margin-block-start:0;font-size:36px}score img{max-height:100px}score p.name{height:69px}score p{background-color:#000;margin-block-start:0;margin-block-end:0;margin-top:-45px}score{display:inline-block;padding:4px;margin:10px;vertical-align:top}score svg{width:100%;height:100%}score svg text{fill:#f0f8ff;font-size:medium;font-family:monospace;font-weight:bolder}gameview{display:inline-flex}gameview prompt{display:none}prompt{font-size:2em}answers,gamecode,gameview prompt:first-child,prompt{display:block}player{display:inline-block;width:fit-content;vertical-align:top;transition:padding .5s ease,height 1s ease,transform .5s ease}player img{height:135px;filter:drop-shadow(2px 5px 7px #222)}player p{text-align:center;font-size:1.5em}.waiting img{height:103px}.waiting{padding-top:340px}.scale-in{transition:all .5s ease;transform:scale(1)}.scale-out{transform:scale(0)}div.vvv{position:relative;display:table}.vvv player{position:relative;left:0;z-index:-1;display:inline-flex}.vvv player img{position:absolute;z-index:-1;height:52px}answer div.vvv player p{margin-block-start:0;margin-block-end:0;opacity:.9;font-family:auto;background:none;padding:0}answer p:first-child{background-color:rgba(5,0,255,.5);padding:20px;margin-block-end:0}answer p{font-family:serif;background:#000;margin-block-start:0}answer{display:inline-block;padding:20px;margin:10px;font-size:1.5em;vertical-align:top}body{text-align:center}.restart{position:absolute;bottom:0;width:100%}answer,gamecode,gamecode h2,player p,prompt,timer{text-shadow:#000 1px 1px 2px,#000 1px 1px 2px,#000 1px 1px 2px,#000 1px 1px 2px,#000 1px 1px 2px,#000 1px 1px 2px,#000 1px 1px 2px,#000 1px 1px 2px,#000 1px 1px 2px,#000 0 0 1px;color:#f0f8ff}gamecode{font-size:3em}timer{font-size:4em;left:20px}timer,video.bg{position:absolute}video.bg{opacity:1;transition:opacity .5s ease;top:0;left:0;z-index:-1}video.bg.remove{opacity:0}.hide{display:none}gameview{width:calc(100vw - 16px);display:block}gameview .text{font-size:3em}gameview button{min-height:60px;max-height:fit-content}gameview button,gameview input{font-size:1em;display:block;width:100%}body{overscroll-behavior:contain}gameview button+button,gameview input+button{margin-top:10px}form{position:absolute;bottom:0;left:50%;margin-left:auto;margin-right:auto;left:0;right:0;text-align:center}gameview input[type=number],gameview input[type=text],gameview select:focus textarea{font-size:30px}score:first-of-type p.name{background-color:gold}score:first-of-type p.name,score:nth-of-type(2) p.name{box-shadow:15px 19px 38px rgb(0 0 0/33%),10px 15px 12px rgb(0 0 0/69%)}score:nth-of-type(2) p.name{background-color:silver}score:nth-of-type(3) p.name{background-color:#cd7f32;box-shadow:15px 19px 38px rgb(0 0 0/33%),10px 15px 12px rgb(0 0 0/69%)}#loading{display:inline-block;width:15px;height:15px;border-radius:50%;border:3px solid hsla(0,0%,60.8%,.3);border-top-color:#fff;animation:spin 1s ease-in-out infinite;-webkit-animation:spin 1s ease-in-out infinite}@keyframes spin{to{-webkit-transform:rotate(1turn)}}@-webkit-keyframes spin{to{-webkit-transform:rotate(1turn)}}#vis{height:35px;line-height:35px;text-align:center}#vis div,#vis span{display:inline-block;vertical-align:middle;line-height:normal}</style><link rel="shortcut icon" href="favicon.f20af07c.png"><script src="https://code.jquery.com/jquery-3.0.0.min.js" charset="utf-8"></script><script src="https://cdn.jsdelivr.net/npm/peerjs@1.3.0/dist/peerjs.min.js"></script><script defer src="src.42eddcba.js" charset="utf-8" class="internal"></script></head><body> <video src="" class="bg" loop autoplay></video> <timer></timer> <gamecode></gamecode> <prompt></prompt> <answers></answers> <gameview> <join> Four Letter Game Code<br><input id="roomcode" type="text"><br> Your Player Name<br><input id="name" type="text" maxlength="12" onkeyup="this.value = this.value.replace(',','')"><br> <button onclick="client();$('form').remove();$(this).attr('disabled',true);setTimeout(function(){$('button').attr('disabled',false)}, 6000);" type="button" name="button">Join!</button> </join> </gameview> <form class="form" action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSdQTUf_lHCGd69CPqg6BKtRp5wI5MINHjsMB-nvSmdZ4Q1o5g/formResponse"> <label>Suggest a prompt (win cash for top prompt!)</label><br> <input name="entry.1807857863" type="text"><br> <label>Email (optional)</label><br> <input name="entry.75815573" type="email" required><br> <input type="submit" value="Send"> </form> <script>var e=new URL(window.location.href);"#host"!==e.hash||navigator.userAgent.includes("Electron")?navigator.userAgent.includes("Electron")&&$("form").remove():(navigator.userAgent.includes("Electron")&&$("form").remove(),navigator.userAgent.includes("Electron")||($("join").addClass("hide"),$("body").append('<div class="restart"><div><button onclick="restart()">new game / end game</button></div><div><button onclick="again()">Again, Same Players</button></div></div>'))),$(document).ready(function(){if($(".internal").each(function(e,t){$.getScript($(t).attr("src").slice(1))}),$("join input").keyup(function(e){event.preventDefault(),13===e.keyCode&&$(this).nextUntil("input, button").last().next().focus()}),localStorage.getItem("code"))var[e,t]=localStorage.getItem("code").split(",");if(localStorage.getItem("name")){var n=localStorage.getItem("name");$("#name").val(n)}t&&Date.now()-e<6e5&&$("#roomcode").val(t)});</script> <div id="vis"></div>
-</body></html>
+<html>
+<head>
+  <title>Enter your code at Rumpus.XYZ</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <style>score p.score{
+      background-color: rgba(0, 0, 0, 0.0);
+      padding: 5px 20px;
+      margin-block-start: 0px;
+      font-size: 36px;
+    }
+    score img{
+      max-height: 100px;
+    }
+    score p.name{height: 69px;}
+    score p{
+      background-color: black;
+      margin-block-start: 0px;
+      margin-block-end: 0px;
+      margin-top: -45px;
+    }
+    score{
+      display: inline-block;
+      padding: 4px;
+      margin: 10px;
+      vertical-align: top;
+    }
+    score svg {width:100%;height:100%;}
+    score svg text {
+      fill: aliceblue;
+      font-size: initial;
+      font-family: monospace;
+      font-weight: bolder;
+    }
+    gameview {
+      display: inline-flex;
+    }
+    gameview prompt{
+      display: none;
+    }
+    prompt{
+      font-size: 2em;
+    }
+    gamecode, gameview prompt:first-child, prompt, answers{
+      display: block;
+    }
+    player{
+      display:inline-block;
+      width:fit-content;
+      vertical-align: top;
+      transition:
+        padding 0.5s ease,
+        height 1s ease,
+        transform 0.5s ease;
+    }
+    player img{
+      height: 135px;
+      filter: drop-shadow(2px 5px 7px #222);
+    }
+    player p {text-align: center;font-size: 1.5em;}
+    .waiting img{height:103px;}
+    /*.waiting p{display: none;}*/
+    .waiting{
+      padding-top:340px;
+    }
+    .scale-in{
+      transition: all 0.5s ease;
+      transform: scale(1);
+    }
+    .scale-out{
+      transform: scale(0);
+    }
+    div.vvv {position: relative;display: table;}
+
+    .vvv player{position: relative;;left: 0;z-index: -1;display: inline-flex;}
+    .vvv player img{
+      z-index: -1;
+      height: 52px;
+      max-height: 47px;
+      width: 63px;
+      object-fit: contain;
+    }
+    answer div.vvv player p{
+      margin-block-start: 0;
+      margin-block-end: 0;
+      opacity: 0.9;
+      font-family: auto;
+      background: none;
+      padding: 0px;
+    }
+
+    answer .last-round img.silver{
+      max-width: 30px;
+      background-color: silver;
+      border-radius: 15px;
+      box-shadow: 2px 2px 9px silver;
+      max-height: 24px;
+      width: 27px;
+      object-fit: contain;
+    }
+
+    answer p:first-child{
+      background-color: rgba(5,0,255,0.5);
+      padding: 20px;
+      margin-block-end: 0px;
+    }
+    answer p{
+      font-family:serif;
+      background:black;
+      margin-block-start: 0px;
+      margin-block-end: 0.5em;
+    }
+    answer{
+      display: inline-block;
+      padding: 10px;
+      margin: 10px;
+      font-size: 1.5em;
+      vertical-align: top;
+      max-width: 28vw;
+      min-width: 28vw;
+    }
+    body{text-align: center;}
+    .restart {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+    }
+    gamecode h2, player p, timer, gamecode, prompt, answer{
+      text-shadow: #000 1px 1px 2px, #000 1px 1px 2px, #000 1px 1px 2px, #000 1px 1px 2px, #000 1px 1px 2px, #000 1px 1px 2px, #000 1px 1px 2px, #000 1px 1px 2px, #000 1px 1px 2px, #000 0px 0px 1px;
+      color: aliceblue;
+      /* text-shadow: #fff 0px 0px 1px, #fff 0px 0px 1px, #fff 0px 0px 1px, #fff 0px 0px 1px, #fff 0px 0px 1px, #fff 0px 0px 1px, #fff 0px 0px 1px, #fff 0px 0px 1px, #fff 0px 0px 1px, #fff 0px 0px 1px, #000 4px 5px 5px; */
+    }
+    gamecode{
+      font-size: 3em;
+    }
+    timer{
+      font-size: 4em;
+      position: absolute;
+      left: 20px;
+    }
+    video.bg{
+      opacity: 1;
+      transition: opacity 0.5s ease;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+    video.bg.remove{
+      opacity: 0;
+    }
+
+    .hide {display: none;}
+    gameview{
+      width: calc(100vw - 16px);
+      display: block;  /*  fix for host/client */
+    }
+    gameview .text{font-size: 3em;}
+    gameview button{font-size: 1em;}
+    
+    gameview button {
+      display: block;
+      min-height: 60px;
+      max-height: fit-content;
+      width: 100%;
+    }
+    gameview input {
+    display: block;
+    width: 100%;
+    font-size: 1em;
+    }
+    body{
+      overscroll-behavior: contain;
+    }
+    gameview input + button {margin-top: 10px;}
+    gameview button + button {margin-top: 10px;}
+    form {position: absolute;
+    bottom: 0;
+    /* display: block; */
+    left: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
+    text-align: center;}
+    
+    gameview input[type='text'],
+    gameview input[type='number'],
+    gameview select:focus
+    textarea {
+      font-size: 30px;
+
+    }
+    score:nth-of-type(1) p.name{background-color: gold;box-shadow: 15px 19px 38px rgb(0 0 0 / 33%), 10px 15px 12px rgb(0 0 0 / 69%);}
+    score:nth-of-type(2) p.name{background-color: silver;box-shadow: 15px 19px 38px rgb(0 0 0 / 33%), 10px 15px 12px rgb(0 0 0 / 69%);}
+    score:nth-of-type(3) p.name{background-color: #cd7f32;box-shadow: 15px 19px 38px rgb(0 0 0 / 33%), 10px 15px 12px rgb(0 0 0 / 69%);}
+    #loading {
+      display: inline-block;
+      width: 15px;
+      height: 15px;
+      border: 3px solid rgba(155,155,155,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+      -webkit-animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { -webkit-transform: rotate(360deg); }
+    }
+    @-webkit-keyframes spin {
+      to { -webkit-transform: rotate(360deg); }
+    }
+    #vis{
+      height: 35px;
+      line-height: 35px;
+      text-align: center;
+    }
+    #vis span, #vis div{
+      display: inline-block;
+      vertical-align: middle;
+      line-height: normal;
+    }
+
+
+    .vvv.final player p {
+      display: none;
+    }
+    div.vvv.final {
+      display: inline-block;
+    }
+    .vvv.final player img{
+      z-index: -1;
+      max-width: 30px;
+      max-height: 24px;
+      width: 27px;
+      border-radius: 15px;
+      object-fit: contain;
+    }
+    .vvv.final.gold img{
+      background-color: gold;
+      box-shadow: 2px 2px 9px gold;
+    }
+    .vvv.final.silver img{
+      background-color: silver;
+      box-shadow: 2px 2px 9px silver;
+    }
+    .vvv.final.bronze img{
+      background-color: #cd7f32;
+      box-shadow: 2px 2px 9px #cd7f32;
+    }
+    
+    [color=gold]{
+      background-color: gold;
+    }
+    [color=silver]{
+      background-color: silver;
+    }
+    [color=bronze]{
+      background-color: #cd7f32;
+    }</style>
+  <link rel="shortcut icon" href="/favicon.2e70f008.png">
+
+  <script src="https://code.jquery.com/jquery-3.0.0.min.js" charset="utf-8"></script>
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.3.0/dist/peerjs.min.js"></script>
+
+  <script defer="" src="/src.77a0a3b8.js" charset="utf-8" class="internal"></script>
+</head>
+<body>
+  <video src="" class="bg" loop="true" autoplay=""></video>
+  <timer></timer>
+  <gamecode></gamecode>
+  <prompt></prompt>
+  <answers></answers>
+  <gameview>
+    <join>
+      Four Letter Game Code<br><input id="roomcode" type="text"><br>
+      Your Player Name<br><input id="name" type="text" maxlength="12" onkeyup="this.value = this.value.replace(',','')"><br>
+      <button onclick="client();$('form').remove();$(this).attr('disabled',true);setTimeout(function(){$('button').attr('disabled',false)}, 6000);" type="button" name="button">Join!</button>
+    </join>
+  </gameview>
+
+  <form class="form" action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSdQTUf_lHCGd69CPqg6BKtRp5wI5MINHjsMB-nvSmdZ4Q1o5g/formResponse">
+    <label>Suggest a prompt (win cash for top prompt!)</label><br>
+    <input name="entry.1807857863" type="text"><br>
+
+    <label>Email (optional)</label><br>
+    <input name="entry.75815573" type="email" required=""><br>
+
+    <input type="submit" value="Send">
+  </form>
+
+  <script>var url = new URL(window.location.href);
+
+if (url.hash !== "#host" || navigator.userAgent.includes("Electron")) {
+  if (navigator.userAgent.includes("Electron")) {
+    $('form').remove();
+  } // var innerHTML = `or <a href="/host">Host a game!</a>`
+  // $("join").append(innerHTML);
+
+} else {
+  if (navigator.userAgent.includes("Electron")) {
+    $('form').remove();
+  }
+
+  if (!navigator.userAgent.includes("Electron")) {
+    $("join").addClass("hide");
+    $("body").append('<div class="restart"><div><button onclick="restart()">new game / end game</button></div><div><button onclick="again()">Again, Same Players</button></div></div>');
+  } //
+  //  window.onbeforeunload = function () {
+  //     return "Are you sure?";
+  // }
+
+}
+
+$(document).ready(function () {
+  $(".internal").each(function (i, e) {
+    $.getScript($(e).attr("src").slice(1));
+  });
+  $("join input").keyup(function (e) {
+    event.preventDefault();
+    e.keyCode === 13 ? $(this).nextUntil("input, button").last().next().focus() : "";
+  });
+  if (localStorage.getItem("code")) var [timeStamp, code] = localStorage.getItem("code").split(","); // `${timeStamp},${code}`
+
+  if (localStorage.getItem("name")) {
+    var name = localStorage.getItem("name");
+    $("#name").val(name);
+  } // `${timeStamp},${code}`
+
+
+  if (code && Date.now() - timeStamp < 600000) {
+    $("#roomcode").val(code);
+  }
+});</script>
+  <div id="vis"></div>
+</body>
+</html>
